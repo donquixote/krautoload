@@ -19,8 +19,7 @@ It should work ok, but API details may still be changed based on community feedb
 
 Cache solutions (APC) exist but are not accessible yet.
 
-The project is a spin-off of the "xautoload" module for Drupal, with some changes.  
-http://drupal.org/project/xautoload
+The project is a spin-off of the ["xautoload" module for Drupal](http://drupal.org/project/xautoload), with some changes.  
 
 Unlike xautoload, Krautoload is written in anticipation of the hopefully upcoming PSR-X.  
 It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up with PSR-0.
