@@ -1,4 +1,4 @@
-Krautoload is a pluggable PHP class autoloader library that makes you think of Kartoffelbrei, Kasseler and Sauerkraut.  
+Krautoload is a pluggable PHP class autoloader library that makes you fantasize of Kartoffelbrei, Kasseler and Sauerkraut.  
 It has native support for
 - [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
 - Variation of PSR-0 which allows shallow directory structures.
