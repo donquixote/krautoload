@@ -1,10 +1,10 @@
 Krautoload is a pluggable PHP class autoloader library that makes you think of Kartoffelbrei, Kasseler and Sauerkraut.  
 It has native support for
-- PSR-0
+- [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
 - Variation of PSR-0 which allows shallow directory structures.
-- PEAR
+- PEAR (that is the old-school pattern with underscores instead of namespaces)
 - Variation of PEAR which allows shallow directory structures.
-- The proposed PSR-X, which is a shallow-dir variation of PSR-0 without the special underscore handling.
+- The [proposed PSR-X](https://github.com/php-fig/fig-standards/blob/master/proposed/autoloader.md), which is a shallow-dir variation of PSR-0 without the special underscore handling.
 
 Besides that, custom plugins can be mapped to any namespaces and prefixes.  
 This way, you can easily support old-school libraries which don't support any standards, without bloating the SPL autoload stack.
@@ -16,13 +16,14 @@ Krautoload is designed for high performance, especially in the case of large nam
 
 The project is to be considered in "Preview" status.  
 It should work ok, but API details may still be changed based on community feedback.
+Especially, the term "PSR-X" may change in the future, if it gets accepted.
 
-Cache solutions (APC) exist but are not accessible yet.
+A cache layer (APC) basically exist, but is not accessible yet.
 
 The project is a spin-off of the ["xautoload" module for Drupal](http://drupal.org/project/xautoload), with some changes.  
 
 Unlike xautoload, Krautoload is written in anticipation of the hopefully upcoming PSR-X.  
-It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up with PSR-0.
+It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up with PSR-0, for the special underscore handling.
 
 
 ## Usage
