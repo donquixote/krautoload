@@ -42,6 +42,9 @@ Krautoload::registration()->namespacePSR0('FooVendor\FooPackage', "$path_to_foo_
 new FooVendor\FooPackage\Foo\Bar\Baz();
 ```
 
+See [Krautoload\RegistrationHub](https://github.com/donquixote/krautoload/blob/master/src/Krautoload/RegistrationHub.php)
+to see all the available registration methods.
+
 
 ## Unit tests
 
