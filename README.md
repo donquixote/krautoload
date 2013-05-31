@@ -12,8 +12,7 @@ This way, you can easily support old-school libraries which don't support any st
 Krautoload is designed for high performance, especially in the case of large namespace maps, as often found in modular architectures.
 
 
-Project status and history
-==============================
+## Project status and history
 
 The project is to be considered in "Preview" status.
 It should work ok, but API details may still be changed based on community feedback.
@@ -27,8 +26,7 @@ Unlike xautoload, Krautoload is written in anticipation of the hopefully upcomin
 It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up with PSR-0.
 
 
-Usage
-=============
+## Usage
 
 Krautoload provides a start-off class with static methods, for those who want to avoid a lengthy bootstrap.
 Alternative bootstrap helpers may be provided based on your feedback.
@@ -45,8 +43,7 @@ new FooVendor\FooPackage\Foo\Bar\Baz();
 ```
 
 
-Unit tests
-=================
+## Unit tests
 
 Krautoload is designed to be unit-testable, better than other class loaders.
 Its architecture allows to mock out and simulate all hits to the filesystem (file_exists(), require_once, etc).
