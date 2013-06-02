@@ -14,6 +14,43 @@ class RegistrationHub {
     $this->plugins['PSRX'] = new FinderPlugin_PSRX();
   }
 
+  /**
+   * @param callback $callback
+   *   Registration callback, which takes as an argument the registration hub.
+   */
+  function krautoloadCallback($callback) {
+    call_user_func($callback, $this);
+  }
+
+  /**
+   * @param string $file
+   *   Path to a PHP file that, on inclusion, returns a registration callback.
+   */
+  function krautoloadFile($file) {
+    $callback = require $file;
+    call_user_func($callback, $this);
+  }
+
+  /**
+   * @param string $dir
+   *   Vendor directory of a project using composer.
+   *   This allows to use Krautoload for composer-based PHP projects.
+   */
+  function composerVendorDir($dir) {
+    if (is_file($dir . '/composer/autoload_namespaces.php')) {
+      $namespaces = include $dir . '/composer/autoload_namespaces.php';
+      foreach ($namespaces as $namespace => $root_path) {
+        $this->namespacePSR0($namespace, $root_path);
+      }
+    }
+    if (is_file($dir . '/composer/autoload_classmap.php')) {
+      $class_map = include $dir . '/composer/autoload_classmap.php';
+      foreach ($class_map as $class => $file) {
+        $this->finder->registerClass($class, $file);
+      }
+    }
+  }
+
   function namespacePSR0($namespace, $root_path) {
     $namespace_path_fragment = $this->namespacePathFragment($namespace);
     $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
@@ -44,6 +81,10 @@ class RegistrationHub {
     $namespace_path_fragment = $this->namespacePathFragment($namespace);
     $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
     $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $this->plugins['PSRX']);
+  }
+
+  function classFile($class, $file) {
+    $this->finder->registerClass($class, $file);
   }
 
   /**
