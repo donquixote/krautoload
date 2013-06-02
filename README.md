@@ -1,4 +1,4 @@
-Krautoload is a pluggable PHP class autoloader library that makes you think of Kartoffelbrei, Kasseler and Sauerkraut.  
+Krautoload is a pluggable PHP class autoloader library that makes you fantasize of Kartoffelbrei, Kasseler and Sauerkraut.  
 It has native support for
 - [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
 - Variation of PSR-0 which allows shallow directory structures.
@@ -9,13 +9,13 @@ It has native support for
 Besides that, custom plugins can be mapped to any namespaces and prefixes.  
 This way, you can easily support old-school libraries which don't support any standards, without bloating the SPL autoload stack.
 
-Krautoload is designed for high performance, especially in the case of large namespace maps, as often found in modular architectures.
+Krautoload is designed to perform equally well no matter how many namespaces are registered.
 
 
 ## Project status and history
 
 The project is to be considered in "Preview" status.  
-It should work ok, but API details may still be changed based on community feedback.
+It should work ok, but API details may still change based on community feedback.
 Especially, the term "PSR-X" may change in the future, if it gets accepted.
 
 A cache layer (APC) basically exist, but is not accessible yet.
@@ -24,6 +24,12 @@ The project is a spin-off of the ["xautoload" module for Drupal](http://drupal.o
 
 Unlike xautoload, Krautoload is written in anticipation of the hopefully upcoming PSR-X.  
 It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up with PSR-0, for the special underscore handling.
+
+
+## Purpose / Audience
+
+Modern PHP projects typically use class loading solutions shipped with the framework, or provided by Composer.
+Thus, Krautoload is mainly aimed at framework developers, for copying or inspiration.
 
 
 ## Usage
