@@ -15,12 +15,20 @@ class Krautoload {
     require_once $basedir . '/ClassLoader/NoCache.php';
     require_once $basedir . '/FinderPlugin/Interface.php';
     require_once $basedir . '/FinderPlugin/ShallowPSR0.php';
+
+    // Build the class finder and loader, and register it to the spl stack.
     $finder = new Krautoload\ApiClassFinder();
-    $plugin = new Krautoload\FinderPlugin_ShallowPSR0();
-    $finder->registerNamespacePathPlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
     $loader = new Krautoload\ClassLoader_NoCache($finder);
     $loader->register();
+
+    // Wire up the class finder so it can find Krautoload classes.
+    // Krautoload uses PSR-0 with only underscores after the package namespace.
+    $plugin = new Krautoload\FinderPlugin_ShallowPSR0_AllUnderscore();
+    $finder->registerNamespacePathPlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
+
+    // Create the registration hub.
     self::$hub = new Krautoload\RegistrationHub($finder);
+    return self::$hub;
   }
 
   static function registration() {
