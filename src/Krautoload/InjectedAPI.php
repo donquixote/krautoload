@@ -62,7 +62,7 @@ class InjectedAPI {
    */
   function guessFileCandidate($file) {
     if (is_file($file)) {
-      include $file;
+      include_once $file;
       return class_exists($this->className, FALSE);
     }
     return FALSE;
