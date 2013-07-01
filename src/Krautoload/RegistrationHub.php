@@ -68,13 +68,13 @@ class RegistrationHub {
     $prefix_path_fragment = $this->prefixPathFragment($prefix);
     $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
     $deep_path .= $prefix_path_fragment;
-    $this->prefixMap->registerDeepPath($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
+    $this->finder->registerPrefixPathPlugin($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
   }
 
   function prefixShallowPEAR($prefix, $deep_path) {
     $prefix_path_fragment = $this->prefixPathFragment($prefix);
     $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
-    $this->prefixMap->registerDeepPath($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
+    $this->finder->registerPrefixPathPlugin($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
   }
 
   function namespacePSRX($namespace, $deep_path) {
