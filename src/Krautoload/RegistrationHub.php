@@ -51,6 +51,14 @@ class RegistrationHub {
     }
   }
 
+  function namespacesPSR0($namespaces) {
+    foreach ($namespaces as $namespace => $paths) {
+      foreach ((array) $paths as $path) {
+        $this->namespacePSR0($namespace, $path);
+      }
+    }
+  }
+
   function namespacePSR0($namespace, $root_path) {
     $namespace_path_fragment = $this->namespacePathFragment($namespace);
     $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
@@ -75,6 +83,14 @@ class RegistrationHub {
     $prefix_path_fragment = $this->prefixPathFragment($prefix);
     $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
     $this->finder->registerPrefixPathPlugin($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
+  }
+
+  function namespacesPSRX($namespaces) {
+    foreach ($namespaces as $namespace => $paths) {
+      foreach ((array) $paths as $path) {
+        $this->namespacePSRX($namespace, $path);
+      }
+    }
   }
 
   function namespacePSRX($namespace, $deep_path) {
