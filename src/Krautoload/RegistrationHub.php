@@ -39,15 +39,82 @@ class RegistrationHub {
   function composerVendorDir($dir) {
     if (is_file($dir . '/composer/autoload_namespaces.php')) {
       $namespaces = include $dir . '/composer/autoload_namespaces.php';
-      foreach ($namespaces as $namespace => $root_path) {
-        $this->namespacePSR0($namespace, $root_path);
-      }
+      $this->composerPrefixes($namespaces);
     }
     if (is_file($dir . '/composer/autoload_classmap.php')) {
       $class_map = include $dir . '/composer/autoload_classmap.php';
       foreach ($class_map as $class => $file) {
         $this->finder->registerClass($class, $file);
       }
+    }
+  }
+
+  /**
+   * Adds prefixes.
+   *
+   * @param array $prefixes
+   *   Prefixes to add
+   */
+  function composerPrefixes(array $prefixes) {
+    foreach ($prefixes as $prefix => $path) {
+      $this->composerPrefix($prefix, $path);
+    }
+  }
+
+  /**
+   * Registers a set of classes
+   *
+   * @param string $prefix
+   *   The classes prefix
+   * @param array|string $paths
+   *   The location(s) of the classes
+   */
+  function composerPrefix($prefix, $paths) {
+
+    if (!$prefix) {
+      // We consider this as a "fallback".
+    }
+    elseif ('\\' === substr($prefix, -1)) {
+      // We assume that $prefix is meant as a namespace,
+      // and the paths are PSR-0 directories.
+      $namespace = substr($prefix, 0, -1);
+      foreach ((array) $paths as $path) {
+        $this->namespacePSR0($namespace, $path);
+      }
+    }
+    elseif (FALSE !== strrpos($prefix, '\\')) {
+      // We assume that $prefix is meant as a namespace,
+      // and the paths are PSR-0 directories.
+      $namespace = $prefix;
+      foreach ((array) $paths as $path) {
+        $this->namespacePSR0($namespace, $path);
+        $this->classFile($prefix, $path . '.php');
+      }
+      // TODO:
+      //   Register special plugins to cover other FQCNs
+      //   that happen to begin with with the prefix.
+    }
+    elseif ('_' === substr($prefix, -1)) {
+      // We assume that $prefix is meant as a PEAR prefix,
+      // and the paths are PSR-0 directories.
+      foreach ((array) $paths as $path) {
+        $this->prefixPEAR(substr($prefix, 0, -1), $path);
+      }
+      // TODO:
+      //   Register special plugins to cover other FQCNs
+      //   that happen to begin with with the prefix.
+    }
+    else {
+      // We assume that $prefix is meant as a PEAR prefix OR as namespace,
+      // and the paths are PSR-0 or PEAR directories.
+      foreach ((array) $paths as $path) {
+        $this->namespacePSR0($prefix, $path);
+        $this->prefixPEAR($prefix, $path);
+        $this->classFile($prefix, $path . '.php');
+      }
+      // TODO:
+      //   Register special plugins to cover other FQCNs
+      //   that happen to begin with with the prefix.
     }
   }
 
