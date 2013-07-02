@@ -24,10 +24,25 @@ namespace Krautoload;
 class FinderPlugin_ShallowPSR0_AllUnderscore implements FinderPlugin_Interface {
 
   function pluginFindFile($api, $prefix, $dir, $suffix) {
-    // We need to replace all underscores in the suffix part.
+
+    // Replace all underscores in the suffix part.
     $suffix = str_replace('_', DIRECTORY_SEPARATOR, $suffix);
+
     // We "guess", because we don't know if the file exists.
     if ($api->guessFile($dir . $suffix)) {
+      return TRUE;
+    }
+  }
+
+  function pluginLoadClass($class, $prefix, $dir, $suffix) {
+
+    // Replace all underscores in the suffix part.
+    $suffix = str_replace('_', DIRECTORY_SEPARATOR, $suffix);
+
+    // Check if the file exists.
+    if (is_file($file = $dir . $suffix)) {
+      require $file;
+      // The class is expected to exist after file inclusion.
       return TRUE;
     }
   }

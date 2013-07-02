@@ -7,6 +7,10 @@ class RegistrationHub {
   protected $finder;
   protected $plugins = array();
 
+  /**
+   * @param \Krautoload\ClassLoader_Pluggable_Interface $finder
+   *   A finder object where namespace and prefix plugins can be registered.
+   */
   function __construct($finder) {
     $this->finder = $finder;
     $this->plugins['ShallowPEAR'] = new FinderPlugin_ShallowPEAR();
@@ -118,10 +122,25 @@ class RegistrationHub {
     }
   }
 
-  function namespacesPSR0($namespaces) {
+  function namespacesPSR0($namespaces, $plugin = NULL) {
     foreach ($namespaces as $namespace => $paths) {
       foreach ((array) $paths as $path) {
         $this->namespacePSR0($namespace, $path);
+      }
+    }
+  }
+
+  function namespacesPluginPSR0($namespaces, $plugin = NULL) {
+    if (!isset($plugin)) {
+      $plugin = $this->plugins['ShallowPSR0'];
+    }
+    elseif (is_string($plugin)) {
+      $class = "Krautoload\\FinderPlugin_ShallowPSR0_$plugin";
+      $plugin = new $class();
+    }
+    foreach ($namespaces as $namespace => $paths) {
+      foreach ((array) $paths as $path) {
+        $this->namespacePluginPSR0($namespace, $path, $plugin);
       }
     }
   }
@@ -131,6 +150,13 @@ class RegistrationHub {
     $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
     $deep_path .= $namespace_path_fragment;
     $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $this->plugins['ShallowPSR0']);
+  }
+
+  function namespacePluginPSR0($namespace, $root_path, $plugin) {
+    $namespace_path_fragment = $this->namespacePathFragment($namespace);
+    $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
+    $deep_path .= $namespace_path_fragment;
+    $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $plugin);
   }
 
   function namespaceShallowPSR0($namespace, $deep_path) {

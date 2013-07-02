@@ -63,4 +63,20 @@ class FinderPlugin_ShallowPSR0_NoConflict implements FinderPlugin_Interface {
       return TRUE;
     }
   }
+
+  function pluginLoadClass($class, $prefix, $dir, $suffix) {
+    // We need to replace the underscores after the last directory separator.
+    if (FALSE !== $pos = strrpos($suffix, DIRECTORY_SEPARATOR)) {
+      $suffix = substr($suffix, 0, $pos) . str_replace('_', DIRECTORY_SEPARATOR, substr($suffix, $pos));
+    }
+    else {
+      $suffix = str_replace('_', DIRECTORY_SEPARATOR, $suffix);
+    }
+    // We don't know if the file exists.
+    if (is_file($file = $dir . $suffix)) {
+      // We assume that the file defines the class.
+      include $file;
+      return TRUE;
+    }
+  }
 }

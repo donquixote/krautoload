@@ -13,6 +13,7 @@ namespace Krautoload;
 class FinderPlugin_ShallowPSR0_NoUnderscoreInDir implements FinderPlugin_Interface {
 
   function pluginFindFile($api, $prefix, $dir, $suffix) {
+
     // Check for underscores after the last directory separator.
     // In other words: Check for the last underscore, and whether that is
     // followed by a directory separator.
@@ -23,11 +24,33 @@ class FinderPlugin_ShallowPSR0_NoUnderscoreInDir implements FinderPlugin_Interfa
     // We are safe, the class is not in a sub-namespace.
     // So we can proceed with class loading.
 
-    // We need to replace all underscores in the suffix part.
+    // Replace all underscores in the suffix part.
     $suffix = str_replace('_', DIRECTORY_SEPARATOR, $suffix);
 
     // We "guess", because we don't know whether the file exists.
     if ($api->guessFile($dir . $suffix)) {
+      return TRUE;
+    }
+  }
+
+  function pluginLoadClass($class, $prefix, $dir, $suffix) {
+
+    // Check for underscores after the last directory separator.
+    // In other words: Check for the last underscore, and whether that is
+    // followed by a directory separator.
+    if (FALSE !== strrpos($suffix, DIRECTORY_SEPARATOR)) {
+      // Ignore this class.
+      return;
+    }
+    // We are safe, the class is not in a sub-namespace.
+    // So we can proceed with class loading.
+
+    // Replace all underscores in the suffix part.
+    $suffix = str_replace('_', DIRECTORY_SEPARATOR, $suffix);
+
+    // We "guess", because we don't know whether the file exists.
+    if (is_file($file = $dir . $suffix)) {
+      include $file;
       return TRUE;
     }
   }

@@ -30,4 +30,23 @@ class FinderPlugin_ShallowPSR0_NoUnderscoreInDir implements FinderPlugin_Interfa
       return TRUE;
     }
   }
+
+  function pluginLoadClass($class, $prefix, $dir, $suffix) {
+    // Check for underscores after the last directory separator.
+    // In other words: Check for the last underscore, and whether that is
+    // followed by a directory separator.
+    if (FALSE !== $pos = strrpos($suffix, '_')) {
+      if (FALSE === strrpos($suffix, DIRECTORY_SEPARATOR, $pos)) {
+        return;
+      }
+    }
+    // We are safe, no underscore was found after the last directory separator.
+    // So we can proceed with class loading.
+
+    // We "guess", because we don't know whether the file exists.
+    if (is_file($file = $dir . $suffix)) {
+      include $file;
+      return TRUE;
+    }
+  }
 }

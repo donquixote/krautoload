@@ -10,16 +10,20 @@ class Krautoload {
     }
     $basedir = dirname(__FILE__) . '/Krautoload';
     // Include the bare minimum we need before Krautoload can load its own.
+    require_once $basedir . '/ClassLoader/Interface.php';
+    require_once $basedir . '/ClassLoader/Abstract.php';
+    require_once $basedir . '/ClassLoader/Pluggable/Interface.php';
+    require_once $basedir . '/ClassLoader/Pluggable.php';
+    require_once $basedir . '/ApiClassFinder/Interface.php';
+    require_once $basedir . '/ApiClassFinder/Pluggable.php';
     require_once $basedir . '/ApiClassFinder.php';
-    require_once $basedir . '/InjectedAPI.php';
-    require_once $basedir . '/ClassLoader/NoCache.php';
     require_once $basedir . '/FinderPlugin/Interface.php';
     require_once $basedir . '/FinderPlugin/ShallowPSR0.php';
     require_once $basedir . '/FinderPlugin/ShallowPSR0/AllUnderscore.php';
 
     // Build the class finder and loader, and register it to the spl stack.
     $finder = new Krautoload\ApiClassFinder();
-    $loader = new Krautoload\ClassLoader_NoCache($finder);
+    $loader = $finder;
     $loader->register();
 
     // Wire up the class finder so it can find Krautoload classes.
