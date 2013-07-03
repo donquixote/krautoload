@@ -17,9 +17,9 @@ class Krautoload {
     require_once $basedir . '/ApiClassFinder/Interface.php';
     require_once $basedir . '/ApiClassFinder/Pluggable.php';
     require_once $basedir . '/ApiClassFinder.php';
-    require_once $basedir . '/FinderPlugin/Interface.php';
-    require_once $basedir . '/FinderPlugin/ShallowPSR0.php';
-    require_once $basedir . '/FinderPlugin/ShallowPSR0/AllUnderscore.php';
+    require_once $basedir . '/NamespacePathPlugin/Interface.php';
+    require_once $basedir . '/NamespacePathPlugin/ShallowPSR0.php';
+    require_once $basedir . '/NamespacePathPlugin/ShallowPSR0/AllUnderscore.php';
 
     // Build the class finder and loader, and register it to the spl stack.
     $finder = new Krautoload\ApiClassFinder();
@@ -28,7 +28,7 @@ class Krautoload {
 
     // Wire up the class finder so it can find Krautoload classes.
     // Krautoload uses PSR-0 with only underscores after the package namespace.
-    $plugin = new Krautoload\FinderPlugin_ShallowPSR0_AllUnderscore();
+    $plugin = new Krautoload\NamespacePathPlugin_ShallowPSR0_AllUnderscore();
     $finder->registerNamespacePathPlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
 
     // Create the registration hub.

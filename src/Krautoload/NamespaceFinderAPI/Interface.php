@@ -4,5 +4,7 @@ namespace Krautoload;
 
 interface NamespaceFinderAPI_Interface {
 
-  public function namespaceDirectoryPlugin($namespace, $dir, $plugin);
+  public function setNamespace($namespace);
+
+  public function namespaceDirectoryPlugin($baseDir, $relativePath, $plugin);
 }

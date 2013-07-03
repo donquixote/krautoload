@@ -4,11 +4,10 @@ namespace Krautoload;
 
 /**
  * This plugin assumes a shallow PSR-0 mapping, where
- * 1) Whenever a class is requested (*), and this class is within the registered
- *    namespace, then this class contains no underscore after the last namespace
- *    separator.
- * 2) Each of the *.php files within the registered directory defines exactly
- *    the class we expect, as in point (1), and none other.
+ * 1) Any class defined in a file under the registered directory contains NO
+ *    underscore after the last namespace separator.
+ * 2) Any *.php file under the requested directory contains NO underscore in the
+ *    filename.
  *
  * E.g. if the registered namespace is "MyVendor\MyPackage", then
  * - the following is allowed: "MyVendor\MyPackage\Foo\Bar\Baz", but

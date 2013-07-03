@@ -2,15 +2,9 @@
 
 namespace Krautoload;
 
-class NamespaceFinderAPI_ScanRecursive implements ApiNamespaceFinder_Interface {
+class NamespaceFinderAPI_ScanRecursive extends ApiNamespaceFinder_ScanAbstract {
 
-  protected $api;
-
-  function __construct($api) {
-    $this->api = $api;
-  }
-
-  public function namespaceDirectoryPlugin($namespace, $dir, $plugin) {
-    $plugin->pluginScanRecursive($this->api, $namespace, $dir);
+  public function namespaceDirectoryPlugin($baseDir, $relativePath, $plugin) {
+    $plugin->pluginScanRecursive($this->api, $baseDir, $relativePath);
   }
 }

@@ -17,14 +17,16 @@ class ApiNamespaceFinder_Pluggable extends ApiClassFinder_Pluggable implements A
     
     $logicalPath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
     $logicalBasePath = $logicalPath;
-    $logicalPathSuffix = '';
+    $relativePath = '';
+
+    $api->setNamespace($namespace);
 
     while (TRUE) {
 
       // Check any plugin registered for this fragment.
       if (!empty($this->namespaceMap[$logicalBasePath])) {
-        foreach ($this->namespaceMap[$logicalBasePath] as $dir => $plugin) {
-          $api->namespaceDirectoryPlugin($namespace, $dir . $pathSuffix, $plugin);
+        foreach ($this->namespaceMap[$logicalBasePath] as $baseDir => $plugin) {
+          $api->namespaceDirectoryPlugin($baseDir, $relativePath, $plugin);
         }
       }
 
@@ -35,15 +37,15 @@ class ApiNamespaceFinder_Pluggable extends ApiClassFinder_Pluggable implements A
       elseif (DIRECTORY_SEPARATOR === $logicalBasePath) {
         // This happens if a class begins with an underscore.
         $logicalBasePath = '';
-        $pathSuffix = $logicalPath;
+        $relativePath = $logicalPath;
       }
       elseif (FALSE !== $pos = strrpos($logicalBasePath, DIRECTORY_SEPARATOR, -2)) {
         $logicalBasePath = substr($logicalBasePath, 0, $pos + 1);
-        $pathSuffix = substr($logicalPath, $pos + 1);
+        $relativePath = substr($logicalPath, $pos + 1);
       }
       else {
         $logicalBasePath = '';
-        $pathSuffix = $logicalPath;
+        $relativePath = $logicalPath;
       }
     }
   }

@@ -79,9 +79,9 @@ class ApiClassFinder_Pluggable extends ClassLoader_Pluggable implements ApiClass
     if (FALSE !== $pos = strrpos($class, '\\')) {
 
       // Loop through positions of '\\', backwards.
-      $namespace_path_fragment = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, 0, $pos + 1));
-      $path_suffix = substr($class, $pos + 1) . '.php';
-      if ($this->apiMapFindFile($api, $this->namespaceMap, $namespace_path_fragment, $path_suffix)) {
+      $logicalBasePath = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, 0, $pos + 1));
+      $relativePath = substr($class, $pos + 1) . '.php';
+      if ($this->apiMapFindFile($api, $this->namespaceMap, $logicalBasePath, $relativePath)) {
         return TRUE;
       }
     }
@@ -89,8 +89,8 @@ class ApiClassFinder_Pluggable extends ClassLoader_Pluggable implements ApiClass
 
       // The class is not within a namespace.
       // Fall back to the prefix-based finder.
-      $prefix_path_fragment = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
-      if ($this->apiMapFindFile($api, $this->prefixMap, $prefix_path_fragment, '')) {
+      $logicalBasePath = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+      if ($this->apiMapFindFile($api, $this->prefixMap, $logicalBasePath, '')) {
         return TRUE;
       }
     }
@@ -98,7 +98,7 @@ class ApiClassFinder_Pluggable extends ClassLoader_Pluggable implements ApiClass
 
   /**
    * Find the file for a class that in PSR-0 or PEAR would be in
-   * $psr_0_root . '/' . $path_fragment . $path_suffix
+   * $psr_0_root . '/' . $logicalBasePath . $relativePath
    *
    * @param array $map
    *   Either the namespace map or the prefix 
@@ -108,9 +108,9 @@ class ApiClassFinder_Pluggable extends ClassLoader_Pluggable implements ApiClass
    *   can find, until it returns TRUE. Once suggestFile() returns TRUE, we stop
    *   and return TRUE as well. The $file will be in the $api object, so we
    *   don't need to return it.
-   * @param string $path_fragment
+   * @param string $logicalBasePath
    *   First part of the canonical path, with trailing DIRECTORY_SEPARATOR.
-   * @param string $path_suffix
+   * @param string $relativePath
    *   Second part of the canonical path, ending with '.php'.
    *
    * @return TRUE|NULL
@@ -118,35 +118,35 @@ class ApiClassFinder_Pluggable extends ClassLoader_Pluggable implements ApiClass
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
    */
-  protected function apiMapFindFile($api, $map, $path_fragment, $path_suffix) {
-    $path = $path_fragment . $path_suffix;
+  protected function apiMapFindFile($api, $map, $logicalBasePath, $relativePath) {
+    $logicalPath = $logicalBasePath . $relativePath;
     while (TRUE) {
 
       // Check any plugin registered for this fragment.
-      if (!empty($map[$path_fragment])) {
-        foreach ($map[$path_fragment] as $dir => $plugin) {
-          if ($plugin->pluginFindFile($api, $path_fragment, $dir, $path_suffix)) {
+      if (!empty($map[$logicalBasePath])) {
+        foreach ($map[$logicalBasePath] as $baseDir => $plugin) {
+          if ($plugin->pluginFindFile($api, $baseDir, $relativePath)) {
             return TRUE;
           }
         }
       }
 
       // Continue with parent fragment.
-      if ('' === $path_fragment) {
+      if ('' === $logicalBasePath) {
         break;
       }
-      elseif (DIRECTORY_SEPARATOR === $path_fragment) {
+      elseif (DIRECTORY_SEPARATOR === $logicalBasePath) {
         // This happens if a class begins with an underscore.
-        $path_fragment = '';
-        $path_suffix = $path;
+        $logicalBasePath = '';
+        $relativePath = $logicalPath;
       }
-      elseif (FALSE !== $pos = strrpos($path_fragment, DIRECTORY_SEPARATOR, -2)) {
-        $path_fragment = substr($path_fragment, 0, $pos + 1);
-        $path_suffix = substr($path, $pos + 1);
+      elseif (FALSE !== $pos = strrpos($logicalBasePath, DIRECTORY_SEPARATOR, -2)) {
+        $logicalBasePath = substr($logicalBasePath, 0, $pos + 1);
+        $relativePath = substr($logicalPath, $pos + 1);
       }
       else {
-        $path_fragment = '';
-        $path_suffix = $path;
+        $logicalBasePath = '';
+        $relativePath = $logicalPath;
       }
     }
   }

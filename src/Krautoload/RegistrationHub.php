@@ -13,9 +13,9 @@ class RegistrationHub {
    */
   function __construct($finder) {
     $this->finder = $finder;
-    $this->plugins['ShallowPEAR'] = new FinderPlugin_ShallowPEAR();
-    $this->plugins['ShallowPSR0'] = new FinderPlugin_ShallowPSR0();
-    $this->plugins['PSRX'] = new FinderPlugin_PSRX();
+    $this->plugins['ShallowPEAR'] = new PrefixPathPlugin_ShallowPEAR();
+    $this->plugins['ShallowPSR0'] = new NamespacePathPlugin_ShallowPSR0();
+    $this->plugins['PSRX'] = new NamespacePathPlugin_PSRX();
   }
 
   /**
@@ -135,7 +135,7 @@ class RegistrationHub {
       $plugin = $this->plugins['ShallowPSR0'];
     }
     elseif (is_string($plugin)) {
-      $class = "Krautoload\\FinderPlugin_ShallowPSR0_$plugin";
+      $class = "Krautoload\\NamespacePathPlugin_ShallowPSR0_$plugin";
       $plugin = new $class();
     }
     foreach ($namespaces as $namespace => $paths) {
@@ -145,37 +145,44 @@ class RegistrationHub {
     }
   }
 
-  function namespacePSR0($namespace, $root_path) {
-    $namespace_path_fragment = $this->namespacePathFragment($namespace);
-    $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
-    $deep_path .= $namespace_path_fragment;
-    $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $this->plugins['ShallowPSR0']);
+  function namespacePSR0($namespace, $rootDir) {
+    if (empty($namespace)) {
+      $rootDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
+      $this->finder->registerNamespacePathPlugin('', $rootDir, $this->plugins['ShallowPSR0']);
+      $this->finder->registerPrefixPathPlugin('', $rootDir, $this->plugins['ShallowPEAR']);
+    }
+    else {
+      $logicalBasePath = $this->namespaceLogicalPath($namespace);
+      $baseDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
+      $baseDir .= $logicalBasePath;
+      $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
+    }
   }
 
-  function namespacePluginPSR0($namespace, $root_path, $plugin) {
-    $namespace_path_fragment = $this->namespacePathFragment($namespace);
-    $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
-    $deep_path .= $namespace_path_fragment;
-    $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $plugin);
+  function namespacePluginPSR0($namespace, $rootDir, $plugin) {
+    $logicalBasePath = $this->namespaceLogicalPath($namespace);
+    $baseDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
+    $baseDir .= $logicalBasePath;
+    $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $plugin);
   }
 
-  function namespaceShallowPSR0($namespace, $deep_path) {
-    $namespace_path_fragment = $this->namespacePathFragment($namespace);
-    $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
-    $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $this->plugins['ShallowPSR0']);
+  function namespaceShallowPSR0($namespace, $baseDir) {
+    $logicalBasePath = $this->namespaceLogicalPath($namespace);
+    $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
+    $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
   }
 
-  function prefixPEAR($prefix, $root_path) {
-    $prefix_path_fragment = $this->prefixPathFragment($prefix);
-    $deep_path = strlen($root_path) ? $root_path . DIRECTORY_SEPARATOR : '';
-    $deep_path .= $prefix_path_fragment;
-    $this->finder->registerPrefixPathPlugin($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
+  function prefixPEAR($prefix, $rootDir) {
+    $logicalBasePath = $this->prefixLogicalPath($prefix);
+    $baseDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
+    $baseDir .= $logicalBasePath;
+    $this->finder->registerPrefixPathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPEAR']);
   }
 
-  function prefixShallowPEAR($prefix, $deep_path) {
-    $prefix_path_fragment = $this->prefixPathFragment($prefix);
-    $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
-    $this->finder->registerPrefixPathPlugin($prefix_path_fragment, $deep_path, $this->plugins['ShallowPEAR']);
+  function prefixShallowPEAR($prefix, $baseDir) {
+    $logicalBasePath = $this->prefixLogicalPath($prefix);
+    $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
+    $this->finder->registerPrefixPathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPEAR']);
   }
 
   function namespacesPSRX($namespaces) {
@@ -186,10 +193,10 @@ class RegistrationHub {
     }
   }
 
-  function namespacePSRX($namespace, $deep_path) {
-    $namespace_path_fragment = $this->namespacePathFragment($namespace);
-    $deep_path = strlen($deep_path) ? $deep_path . DIRECTORY_SEPARATOR : '';
-    $this->finder->registerNamespacePathPlugin($namespace_path_fragment, $deep_path, $this->plugins['PSRX']);
+  function namespacePSRX($namespace, $baseDir) {
+    $logicalBasePath = $this->namespaceLogicalPath($namespace);
+    $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
+    $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['PSRX']);
   }
 
   function classFile($class, $file) {
@@ -205,7 +212,7 @@ class RegistrationHub {
    * @return string
    *   Path fragment representing the namespace, with trailing DIRECTORY_SEPARATOR.
    */
-  protected function namespacePathFragment($namespace) {
+  protected function namespaceLogicalPath($namespace) {
     return
       strlen($namespace)
       ? str_replace('\\', DIRECTORY_SEPARATOR, $namespace . '\\')
@@ -222,7 +229,7 @@ class RegistrationHub {
    * @return string
    *   Path fragment representing the prefix, with trailing DIRECTORY_SEPARATOR.
    */
-  protected function prefixPathFragment($prefix) {
+  protected function prefixLogicalPath($prefix) {
     return
       strlen($prefix)
       ? str_replace('_', DIRECTORY_SEPARATOR, $prefix . '_')

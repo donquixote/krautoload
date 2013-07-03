@@ -4,7 +4,9 @@ namespace Krautoload;
 
 interface DiscoveryAPI_Interface {
 
-  function fileWithClass($file, $class);
+  function setNamespace($namespace);
 
-  function fileWithClassCandidates($file, $classes);
+  function fileWithClass($file, $relativeClassName);
+
+  function fileWithClassCandidates($file, $relativeClassNames);
 }
