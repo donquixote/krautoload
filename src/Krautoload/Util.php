@@ -26,6 +26,6 @@ class Util {
   }
 
   static function classIsDefined($class) {
-    return class_exists($class, FALSE) || interface_exists($class, FALSE);
+    return class_exists($class, FALSE) || interface_exists($class, FALSE) || trait_exists($class, FALSE);
   }
 }

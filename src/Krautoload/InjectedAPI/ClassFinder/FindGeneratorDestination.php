@@ -2,12 +2,13 @@
 
 namespace Krautoload;
 
-/**
- * To help testability, we use an injected API instead of just a return value.
- * The injected API can be mocked to provide a mocked file_exists(), and to
- * monitor all suggested candidates, not just the correct return value.
- */
-class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract {
+class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_ClassFinder_Abstract {
+
+  protected $destination;
+
+  function getDestination() {
+    return $this->destination;
+  }
 
   /**
    * Suggest a file that, if the file exists,
@@ -22,11 +23,8 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFile($file) {
-    if (is_file($file)) {
-      include $file;
-      return TRUE;
-    }
-    return FALSE;
+    $this->destination = $file;
+    return TRUE;
   }
 
   /**
@@ -42,11 +40,8 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFileCandidate($file) {
-    if (is_file($file)) {
-      include_once $file;
-      return class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($class, FALSE);
-    }
-    return FALSE;
+    $this->destination = $file;
+    return TRUE;
   }
 
   /**
@@ -67,7 +62,7 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   class.
    */
   function claimFile($file) {
-    require $file;
+    $this->destination = $file;
     return TRUE;
   }
 
@@ -89,8 +84,8 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise
    */
   function claimFileCandidate($file) {
-    require_once $file;
-    return class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($class, FALSE);
+    $this->destination = $file;
+    return TRUE;
   }
 
   /**
@@ -108,11 +103,8 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFile_checkIncludePath($file) {
-    if ($this->fileExistsInIncludePath($file)) {
-      include $file;
-      return TRUE;
-    }
-    return FALSE;
+    $this->destination = $file;
+    return TRUE;
   }
 
   /**
@@ -130,10 +122,7 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFileCandidate_checkIncludePath($file) {
-    if ($this->fileExistsInIncludePath($file)) {
-      include_once $file;
-      return class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($class, FALSE);
-    }
-    return FALSE;
+    $this->destination = $file;
+    return TRUE;
   }
 }
