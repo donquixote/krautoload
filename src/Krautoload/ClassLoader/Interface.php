@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-class ClassLoader_Interface {
+interface ClassLoader_Interface {
 
   /**
    * Registers this instance as an autoloader.
@@ -34,5 +34,5 @@ class ClassLoader_Interface {
    * @return string
    *   File where the class is assumed to be.
    */
-  function findFile($class);
+  // function findFile($class);
 }
