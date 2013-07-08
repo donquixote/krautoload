@@ -15,6 +15,7 @@ class Util {
           case 'class_exists':
           case 'interface_exists':
           case 'method_exists':
+          case 'trait_exists':
           case 'is_callable':
           // @todo Add more cases.
             return TRUE;
