@@ -8,16 +8,20 @@ class RegistrationHub {
   protected $plugins = array();
 
   /**
-   * @param \Krautoload\ClassLoader_Pluggable_Interface $finder
+   * @param ClassLoader_Pluggable_Interface $finder
    *   A finder object where namespace and prefix plugins can be registered.
    */
-  function __construct($finder) {
+  function __construct(ClassLoader_Pluggable_Interface $finder) {
     $this->finder = $finder;
     $this->plugins['ShallowPEAR'] = new PrefixPathPlugin_ShallowPEAR();
+    $this->plugins['ShallowPEAR_Uncertain'] = new PrefixPathPlugin_ShallowPEAR_Uncertain();
     $this->plugins['ShallowPSR0'] = new NamespacePathPlugin_ShallowPSR0();
     $this->plugins['PSRX'] = new NamespacePathPlugin_PSRX();
   }
 
+  /**
+   * @return ClassLoader_Pluggable_Interface
+   */
   function getFinder() {
     return $this->finder;
   }
@@ -52,7 +56,7 @@ class RegistrationHub {
     if (is_file($dir . '/composer/autoload_classmap.php')) {
       $class_map = include $dir . '/composer/autoload_classmap.php';
       foreach ($class_map as $class => $file) {
-        $this->finder->registerClass($class, $file);
+        $this->finder->addClassFile($class, $file);
       }
     }
   }
@@ -79,48 +83,45 @@ class RegistrationHub {
    */
   function addPrefixPSR0($prefix, $rootDirs) {
 
-    if (!$prefix) {
+    if ('' === $prefix) {
       // We consider this as a "fallback".
+      $this->addNamespacePSR0('', $rootDirs);
+      $this->addPrefixPEAR('', $rootDirs, TRUE);
     }
     elseif ('\\' === substr($prefix, -1)) {
-      // We assume that $prefix is meant as a namespace,
+      // We know that $prefix is meant as a namespace,
       // and the paths are PSR-0 directories.
-      $namespace = substr($prefix, 0, -1);
-      foreach ((array) $rootDirs as $rootDir) {
-        $this->addNamespacePSR0($namespace, $rootDir);
-      }
+      $this->addNamespacePSR0(substr($prefix, 0, -1), $rootDirs);
     }
     elseif (FALSE !== strrpos($prefix, '\\')) {
       // We assume that $prefix is meant as a namespace,
       // and the paths are PSR-0 directories.
       $namespace = $prefix;
+      $this->addNamespacePSR0($namespace, $rootDirs);
       foreach ((array) $rootDirs as $rootDir) {
-        $this->addNamespacePSR0($namespace, $rootDir);
         $this->addClassFile($prefix, $rootDir . '.php');
       }
-      // TODO:
+      // @todo
       //   Register special plugins to cover other FQCNs
       //   that happen to begin with with the prefix.
     }
     elseif ('_' === substr($prefix, -1)) {
       // We assume that $prefix is meant as a PEAR prefix,
       // and the paths are PSR-0 directories.
-      foreach ((array) $rootDirs as $rootDir) {
-        $this->addPrefixPEAR(substr($prefix, 0, -1), $rootDir);
-      }
-      // TODO:
+      $this->addPrefixPEAR(substr($prefix, 0, -1), $rootDirs, TRUE);
+      // @todo
       //   Register special plugins to cover other FQCNs
       //   that happen to begin with with the prefix.
     }
     else {
       // We assume that $prefix is meant as a PEAR prefix OR as namespace,
       // and the paths are PSR-0 or PEAR directories.
+      $this->addNamespacePSR0($prefix, $rootDirs);
+      $this->addPrefixPEAR($prefix, $rootDirs, TRUE);
       foreach ((array) $rootDirs as $rootDir) {
-        $this->addNamespacePSR0($prefix, $rootDir);
-        $this->addPrefixPEAR($prefix, $rootDir);
         $this->addClassFile($prefix, $rootDir . '.php');
       }
-      // TODO:
+      // @todo
       //   Register special plugins to cover other FQCNs
       //   that happen to begin with with the prefix.
     }
@@ -136,8 +137,8 @@ class RegistrationHub {
     if (empty($namespace)) {
       foreach ((array) $rootDirs as $rootDir) {
         $rootDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
-        $this->finder->registerNamespacePathPlugin('', $rootDir, $this->plugins['ShallowPSR0']);
-        $this->finder->registerPrefixPathPlugin('', $rootDir, $this->plugins['ShallowPEAR']);
+        $this->finder->addNamespacePlugin('', $rootDir, $this->plugins['ShallowPSR0']);
+        $this->finder->addPrefixPlugin('', $rootDir, $this->plugins['ShallowPEAR']);
       }
     }
     else {
@@ -145,7 +146,7 @@ class RegistrationHub {
       foreach ((array) $rootDirs as $rootDir) {
         $baseDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
         $baseDir .= $logicalBasePath;
-        $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
+        $this->finder->addNamespacePlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
       }
     }
   }
@@ -160,36 +161,38 @@ class RegistrationHub {
     $logicalBasePath = $this->namespaceLogicalPath($namespace);
     foreach ((array) $baseDirs as $baseDir) {
       $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
-      $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
+      $this->finder->addNamespacePlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPSR0']);
     }
   }
 
-  function addPrefixesPEAR($prefixes) {
+  function addPrefixesPEAR($prefixes, $preventCollision = FALSE) {
     foreach ($prefixes as $prefix => $rootDirs) {
-      $this->addPrefixPEAR($prefix, $rootDirs);
+      $this->addPrefixPEAR($prefix, $rootDirs, $preventCollision);
     }
   }
 
-  function addPrefixPEAR($prefix, $rootDirs) {
+  function addPrefixPEAR($prefix, $rootDirs, $preventCollision = FALSE) {
     $logicalBasePath = $this->prefixLogicalPath($prefix);
+    $plugin = $preventCollision ? $this->plugins['ShallowPEAR_Uncertain'] : $this->plugins['ShallowPEAR'];
     foreach ((array) $rootDirs as $rootDir) {
       $baseDir = strlen($rootDir) ? $rootDir . DIRECTORY_SEPARATOR : '';
       $baseDir .= $logicalBasePath;
-      $this->finder->registerPrefixPathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPEAR']);
+      $this->finder->addPrefixPlugin($logicalBasePath, $baseDir, $plugin);
     }
   }
 
-  function addPrefixesShallowPEAR($prefixes) {
+  function addPrefixesShallowPEAR($prefixes, $preventCollision = FALSE) {
     foreach ($prefixes as $prefix => $baseDirs) {
-      $this->addPrefixPEAR($prefix, $baseDirs);
+      $this->addPrefixPEAR($prefix, $baseDirs, $preventCollision);
     }
   }
 
-  function addPrefixShallowPEAR($prefix, $baseDirs) {
+  function addPrefixShallowPEAR($prefix, $baseDirs, $preventCollision = FALSE) {
     $logicalBasePath = $this->prefixLogicalPath($prefix);
+    $plugin = $preventCollision ? $this->plugins['ShallowPEAR_Uncertain'] : $this->plugins['ShallowPEAR'];
     foreach ((array) $baseDirs as $baseDir) {
       $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
-      $this->finder->registerPrefixPathPlugin($logicalBasePath, $baseDir, $this->plugins['ShallowPEAR']);
+      $this->finder->addPrefixPlugin($logicalBasePath, $baseDir, $plugin);
     }
   }
 
@@ -203,14 +206,45 @@ class RegistrationHub {
     $logicalBasePath = $this->namespaceLogicalPath($namespace);
     foreach ((array) $baseDirs as $baseDir) {
       $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
-      $this->finder->registerNamespacePathPlugin($logicalBasePath, $baseDir, $this->plugins['PSRX']);
+      $this->finder->addNamespacePlugin($logicalBasePath, $baseDir, $this->plugins['PSRX']);
     }
   }
 
-  function addClassFile($class, $file) {
-    $this->finder->registerClass($class, $file);
+  /**
+   * @param string $namespace
+   * @param string $baseDir
+   * @param NamespacePathPlugin_Interface $plugin
+   */
+  function addNamespacePlugin($namespace, $baseDir, $plugin) {
+    $logicalBasePath = $this->namespaceLogicalPath($namespace);
+    $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
+    $this->finder->addNamespacePlugin($logicalBasePath, $baseDir, $plugin);
+
   }
 
+  /**
+   * @param string $prefix
+   * @param string $baseDir
+   * @param PrefixPathPlugin_Interface $plugin
+   */
+  function addPrefixPlugin($prefix, $baseDir, $plugin) {
+    $logicalBasePath = $this->prefixLogicalPath($prefix);
+    $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
+    $this->finder->addPrefixPlugin($logicalBasePath, $baseDir, $plugin);
+  }
+
+  /**
+   * @param string $class
+   * @param string $file
+   */
+  function addClassFile($class, $file) {
+    $this->finder->addClassFile($class, $file);
+  }
+
+  /**
+   * @param array $namespaces
+   * @return SearchableNamespaces_Interface
+   */
   function buildSearchableNamespaces($namespaces = array()) {
     $searchable = new SearchableNamespaces_Default($this->finder);
     $searchable->addNamespaces($namespaces);

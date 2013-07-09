@@ -108,7 +108,7 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFile_checkIncludePath($file) {
-    if ($this->fileExistsInIncludePath($file)) {
+    if (FALSE !== $file = Util::findFileInIncludePath($file)) {
       include $file;
       return TRUE;
     }
@@ -130,7 +130,7 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    *   FALSE, otherwise.
    */
   function guessFileCandidate_checkIncludePath($file) {
-    if ($this->fileExistsInIncludePath($file)) {
+    if (FALSE !== $file = Util::findFileInIncludePath($file)) {
       include_once $file;
       return class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($class, FALSE);
     }

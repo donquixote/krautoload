@@ -30,7 +30,7 @@ class Krautoload {
     // Wire up the class finder so it can find Krautoload classes.
     // Krautoload uses PSR-0 with only underscores after the package namespace.
     $plugin = new Krautoload\NamespacePathPlugin_ShallowPSR0_AllUnderscore();
-    $finder->registerNamespacePathPlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
+    $finder->addNamespacePlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
 
     // Create the registration hub.
     self::$hub = new Krautoload\RegistrationHub($finder);

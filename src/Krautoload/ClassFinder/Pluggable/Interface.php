@@ -13,7 +13,7 @@ namespace Krautoload;
  * The benefit is that all filesystem contact can be mocked out, by passing in
  * a different implementation for the $api argument.
  */
-interface ClassFinder_Interface extends ClassLoader_Interface {
+interface ClassFinder_Pluggable_Interface extends ClassFinder_Interface, ClassLoader_Pluggable_Interface {
 
   /**
    * Finds the path to the file where the class is defined.

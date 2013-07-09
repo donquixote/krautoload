@@ -13,25 +13,21 @@ namespace Krautoload;
  * The benefit is that all filesystem contact can be mocked out, by passing in
  * a different implementation for the $api argument.
  */
-class ClassFinder_Pluggable extends ClassLoader_Pluggable implements ClassFinder_Interface {
+class ClassFinder_Pluggable extends ClassLoader_Pluggable implements ClassFinder_Pluggable_Interface {
 
   /**
-   * Alternative to loadClass() that passes an $api argument around.
+   * Load a class, and return the file that was successful.
    *
-   * You normally don't want to call this directly, it is rather meant as a
-   * proof-of-concept implementation.
+   * @param string $class
+   *   The class to load.
+   *
+   * @return string
+   *   The file that defined the class.
    */
-  public function apiLoadClass($class) {
-    $api = new InjectedAPI_ClassFinder_LoadClass($class);
-    // $api has a ->suggestFile($file) method, which returns TRUE if the
-    // suggested file exists.
-    // The ->apiFindFile() method is supposed to suggest a number of files
-    // to the $api, until one is successful, and then return TRUE. Or return
-    // FALSE, if nothing was found.
-    if ($this->apiFindFile($api, $class)) {
-      return TRUE;
-    }
-    return FALSE;
+  function loadClassGetFile($class) {
+    $api = new InjectedAPI_ClassFinder_LoadAndRemember($class);
+    $this->apiFindFile($api, $class);
+    return $api->getFile();
   }
 
   /**

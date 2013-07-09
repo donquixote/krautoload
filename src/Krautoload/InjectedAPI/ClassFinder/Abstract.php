@@ -28,32 +28,4 @@ abstract class InjectedAPI_ClassFinder_Abstract implements InjectedAPI_ClassFind
   function getClass() {
     return $this->className;
   }
-
-  /**
-   * Check if a file exists, considering the full include path.
-   *
-   * @param string $file
-   *   The filepath
-   * @return boolean
-   *   TRUE, if the file exists somewhere in include path.
-   */
-  protected function fileExistsInIncludePath($file) {
-    if (function_exists('stream_resolve_include_path')) {
-      // Use the PHP 5.3.1+ way of doing this.
-      return (FALSE !== stream_resolve_include_path($file));
-    }
-    elseif ($file{0} === DIRECTORY_SEPARATOR) {
-      // That's an absolute path already.
-      return file_exists($file);
-    }
-    else {
-      // Manually loop all candidate paths.
-      foreach (explode(PATH_SEPARATOR, get_include_path()) as $base_dir) {
-        if (file_exists($base_dir . DIRECTORY_SEPARATOR . $file)) {
-          return TRUE;
-        }
-      }
-      return FALSE;
-    }
-  }
 }

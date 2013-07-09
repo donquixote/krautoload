@@ -9,50 +9,28 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
   protected $prefixMap = array();
 
   /**
-   * Register a filepath for an individual class.
-   *
-   * @param string $class
-   *   The class, e.g. My_Class
-   * @param string $file_path
-   *   The path, e.g. "../lib/My/Class.php".
+   * @inheritdoc
    */
-  public function registerClass($class, $file_path) {
+  public function addClassFile($class, $file_path) {
     $this->classes[$class][$file_path] = TRUE;
   }
 
   /**
-   * Register a plugin for a namespace.
-   *
-   * @param string $namespace
-   *   The namespace, e.g. "My\Library"
-   * @param string $dir
-   *   The deep path, e.g. "../lib/My/Namespace"
-   * @param FinderPlugin_Interface $plugin
-   *   The plugin.
+   * @inheritdoc
    */
-  public function registerNamespacePathPlugin($logicalPath, $dir, $plugin) {
+  public function addNamespacePlugin($logicalPath, $dir, NamespacePathPlugin_Interface $plugin) {
     $this->namespaceMap[$logicalPath][$dir] = $plugin;
   }
 
   /**
-   * Register a plugin for a prefix.
-   *
-   * @param string $prefix
-   *   The prefix, e.g. "My_Library"
-   * @param string $dir
-   *   The deep filesystem location, e.g. "../lib/My/Prefix".
-   * @param FinderPlugin_Interface $plugin
-   *   The plugin. See 
+   * @inheritdoc
    */
-  public function registerPrefixPathPlugin($prefix_path_fragment, $dir, $plugin) {
-    $this->prefixMap[$prefix_path_fragment][$dir] = $plugin;
+  public function addPrefixPlugin($logicalBasePath, $dir, PrefixPathPlugin_Interface $plugin) {
+    $this->prefixMap[$logicalBasePath][$dir] = $plugin;
   }
 
   /**
-   * Callback for class loading. This will include ("require") the file found.
-   *
-   * @param string $class
-   *   The class to load.
+   * @inheritdoc
    */
   function loadClass($class) {
 
@@ -110,6 +88,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    *
    * @param array $map
    *   Either the namespace map or the prefix
+   * @param string $class
    * @param string $logicalBasePath
    *   First part of the canonical path, with trailing DIRECTORY_SEPARATOR.
    * @param string $relativePath
@@ -120,7 +99,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
    */
-  protected function mapLoadClass($map, $class, $logicalBasePath, $relativePath) {
+  protected function mapLoadClass(array $map, $class, $logicalBasePath, $relativePath) {
 
     $path = $logicalBasePath . $relativePath;
     while (TRUE) {
