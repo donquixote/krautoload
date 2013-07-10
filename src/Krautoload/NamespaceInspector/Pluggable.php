@@ -2,13 +2,13 @@
 
 namespace Krautoload;
 
-class NamespaceVisitor_Pluggable extends ClassFinder_Pluggable implements NamespaceVisitor_Interface {
+class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements NamespaceInspector_Interface {
 
   /**
-   * @param InjectedAPI_NamespaceVisitor_Interface $api
+   * @param InjectedAPI_NamespaceInspector_Interface $api
    * @param string $namespace
    */
-  public function apiFindNamespace($api, $namespace) {
+  public function apiInspectNamespace($api, $namespace) {
 
     // Discard initial namespace separator.
     if ('\\' === $namespace[0]) {
@@ -48,5 +48,16 @@ class NamespaceVisitor_Pluggable extends ClassFinder_Pluggable implements Namesp
         $relativePath = $logicalPath;
       }
     }
+  }
+
+  /**
+   * @inheritdoc
+   */
+  function apiVisitNamespaceClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, $namespace, $recursive = FALSE) {
+    $namespaceVisitorAPI = $recursive
+      ? new InjectedAPI_NamespaceInspector_ScanRecursive($api)
+      : new InjectedAPI_NamespaceInspector_ScanNamespace($api)
+    ;
+    $this->apiInspectNamespace($namespaceVisitorAPI, $namespace);
   }
 }
