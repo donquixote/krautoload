@@ -23,7 +23,7 @@ class Krautoload {
     require_once $basedir . '/NamespacePathPlugin/ShallowPSR0/AllUnderscore.php';
 
     // Build the class finder and loader, and register it to the spl stack.
-    $finder = new Krautoload\NamespaceVisitor_Pluggable();
+    $finder = new Krautoload\NamespaceInspector_Pluggable();
     $loader = $finder;
     $loader->register();
 
