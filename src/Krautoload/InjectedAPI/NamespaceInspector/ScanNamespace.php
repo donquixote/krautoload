@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-class InjectedAPI_NamespaceVisitor_ScanNamespace extends InjectedAPI_NamespaceVisitor_ScanAbstract {
+class InjectedAPI_NamespaceInspector_ScanNamespace extends InjectedAPI_NamespaceInspector_ScanAbstract {
 
   public function namespaceDirectoryPlugin($baseDir, $relativePath, $plugin) {
     $plugin->pluginScanNamespace($this->api, $baseDir, $relativePath);

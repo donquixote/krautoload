@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-abstract class InjectedAPI_NamespaceVisitor_ScanAbstract implements InjectedAPI_NamespaceVisitor_Interface {
+abstract class InjectedAPI_NamespaceInspector_ScanAbstract implements InjectedAPI_NamespaceInspector_Interface {
 
   protected $api;
 
