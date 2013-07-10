@@ -29,7 +29,7 @@ abstract class InjectedAPI_ClassFileVisitor_IncludeEachAbstract extends Injected
     elseif (interface_exists($class, FALSE)) {
       $this->confirmedFileWithInterface($file, $class);
     }
-    elseif (trait_exists($class, FALSE)) {
+    elseif (function_exists('trait_exists') && trait_exists($class, FALSE)) {
       $this->confirmedFileWithTrait($file, $class);
     }
   }

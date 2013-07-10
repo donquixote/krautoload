@@ -34,7 +34,10 @@ class InjectedAPI_ClassFinder_LoadClassGetFile extends InjectedAPI_ClassFinder_A
   function guessFileCandidate($file) {
     if (is_file($file)) {
       include_once $file;
-      if (class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($class, FALSE)) {
+      if (class_exists($this->className, FALSE)
+        || interface_exists($this->className, FALSE)
+        || (function_exists('trait_exists') && trait_exists($this->className, FALSE))
+      ) {
         $this->file = $file;
         return TRUE;
       }
@@ -55,7 +58,10 @@ class InjectedAPI_ClassFinder_LoadClassGetFile extends InjectedAPI_ClassFinder_A
    */
   function claimFileCandidate($file) {
     require_once $file;
-    if (class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($this->className, FALSE)) {
+    if (class_exists($this->className, FALSE)
+      || interface_exists($this->className, FALSE)
+      || (function_exists('trait_exists') && trait_exists($this->className, FALSE))
+    ) {
       $this->file = $file;
       return TRUE;
     }

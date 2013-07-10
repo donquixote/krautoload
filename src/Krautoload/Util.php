@@ -18,6 +18,7 @@ class Util {
           case 'class_exists':
           case 'interface_exists':
           case 'method_exists':
+          case 'trait_exists':
           case 'is_callable':
           // @todo Add more cases.
             return TRUE;
@@ -29,7 +30,10 @@ class Util {
   }
 
   static function classIsDefined($class) {
-    return class_exists($class, FALSE) || interface_exists($class, FALSE) || trait_exists($class, FALSE);
+    return class_exists($class, FALSE)
+      || interface_exists($class, FALSE)
+      || (function_exists('trait_exists') && trait_exists($class, FALSE))
+    ;
   }
 
   /**

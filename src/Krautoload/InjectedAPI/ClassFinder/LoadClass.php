@@ -22,6 +22,9 @@ class InjectedAPI_ClassFinder_LoadClass extends InjectedAPI_ClassFinder_Abstract
    */
   function claimFileCandidate($file) {
     require_once $file;
-    return class_exists($this->className, FALSE) || interface_exists($this->className, FALSE) || trait_exists($this->className, FALSE);
+    return class_exists($this->className, FALSE)
+      || interface_exists($this->className, FALSE)
+      || (function_exists('trait_exists') && trait_exists($this->className, FALSE))
+    ;
   }
 }

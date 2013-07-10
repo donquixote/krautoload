@@ -21,7 +21,10 @@ class PrefixPathPlugin_ShallowPEAR_UseIncludePath extends PrefixPathPlugin_Shall
     // We don't know if the file exists.
     if (FALSE !== $file = Util::findFileInIncludePath($baseDir . $relativePath)) {
       include_once $file;
-      return class_exists($class, FALSE) || interface_exists($class, FALSE) || trait_exists($class, FALSE);
+      return class_exists($class, FALSE)
+        || interface_exists($class, FALSE)
+        || (function_exists('trait_exists') && trait_exists($class, FALSE))
+      ;
     }
   }
 }

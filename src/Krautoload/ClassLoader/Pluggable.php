@@ -51,7 +51,10 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
           else {
             // Assume that the file MAY define the class.
             include_once $file;
-            if (class_exists($class, FALSE) || interface_exists($class, FALSE) || trait_exists($class, FALSE)) {
+            if (class_exists($class, FALSE)
+              || interface_exists($class, FALSE)
+              || (function_exists('trait_exists') && trait_exists($class, FALSE))
+            ) {
               return TRUE;
             }
           }
