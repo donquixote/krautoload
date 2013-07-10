@@ -1,12 +1,13 @@
 {
     "name": "donquixote/krautoload",
     "description": "Krautoload is a pluggable class loader and class discovery tool.",
+    "keywords": ["autoload", "classloader", "PSR-0", "PSR-4", "PSR-X", "PEAR"],
     "homepage": "http://github.com/donquixote/krautoload",
     "license": "GPL",
     "authors": [
         {
             "name": "Andreas Hennings",
-            "homepage": "http://dqxtech.net"
+            "homepage": "http://github.com/donquixote"
         }
     ],
     "support": {
@@ -19,12 +20,6 @@
         "psr-0": {
             "Krautoload\\": "src/"
         }
-    },
-    "archive": {
-        "exclude": [
-            "tests",
-            "phpunit.xml.dist"
-        ]
     },
     "minimum-stability": "dev"
 }
