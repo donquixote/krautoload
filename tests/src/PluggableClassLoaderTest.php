@@ -22,7 +22,7 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
   protected $finder;
 
   public function setUp() {
-    $this->finder = new k\NamespaceVisitor_Pluggable();
+    $this->finder = new k\ClassLoader_Pluggable();
     $this->hub = new k\RegistrationHub($this->finder);
     $this->loader = $this->finder;
   }
