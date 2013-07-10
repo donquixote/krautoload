@@ -11,16 +11,7 @@ class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_Class
   }
 
   /**
-   * Suggest a file that, if the file exists,
-   * HAS TO declare the class we are looking for.
-   * Include that file, if it exists.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   TRUE, if the file exists.
-   *   FALSE, otherwise.
+   * @inheritdoc
    */
   function guessFile($file) {
     $this->destination = $file;
@@ -28,16 +19,7 @@ class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_Class
   }
 
   /**
-   * Suggest a file that, if the file exists,
-   * MAY declare the class we are looking for.
-   * Include that file, if it exists.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   TRUE, if the file exists and the class exists after file inclusion.
-   *   FALSE, otherwise.
+   * @inheritdoc
    */
   function guessFileCandidate($file) {
     $this->destination = $file;
@@ -45,21 +27,7 @@ class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_Class
   }
 
   /**
-   * Suggest a file that HAS TO declare the class we are looking for.
-   * Include that file.
-   *
-   * Unlike guessFile(), claimFile() being called means that the caller is sure
-   * that the file does exist. Thus, we can skip the is_file() check, saving a
-   * few nanoseconds.
-   *
-   * This is useful if a plugin already did the is_file() check by itself.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   Always TRUE, because we assume the file does exist and does define the
-   *   class.
+   * @inheritdoc
    */
   function claimFile($file) {
     $this->destination = $file;
@@ -67,21 +35,7 @@ class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_Class
   }
 
   /**
-   * Suggest a file that MAY declare the class we are looking for.
-   * Include that file.
-   *
-   * Unlike guessFile(), claimFile() being called means that the caller is sure
-   * that the file does exist. Thus, we can skip the is_file() check, saving a
-   * few nanoseconds.
-   *
-   * This is useful if a plugin already did the is_file() check by itself.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   TRUE, if the class exists after file inclusion.
-   *   FALSE, otherwise
+   * @inheritdoc
    */
   function claimFileCandidate($file) {
     $this->destination = $file;
@@ -89,40 +43,18 @@ class InjectedAPI_ClassFinder_FindGeneratorDestination extends InjectedAPI_Class
   }
 
   /**
-   * Suggest a file that, if the file exists,
-   * HAS TO declare the class we are looking for.
-   * Include that file, if it exists.
-   *
-   * Unlike guessFile(), this one checks the full PHP include path.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   TRUE, if the file exists.
-   *   FALSE, otherwise.
+   * @inheritdoc
    */
   function guessFile_checkIncludePath($file) {
-    $this->destination = $file;
-    return TRUE;
+    // Include path is not supported when looking for a destination.
+    return FALSE;
   }
 
   /**
-   * Suggest a file that, if the file exists,
-   * MAY declare the class we are looking for.
-   * Include that file, if it exists.
-   *
-   * Unlike guessFile(), this one checks the full PHP include path.
-   *
-   * @param string $file
-   *   The file that is supposed to declare the class.
-   *
-   * @return boolean
-   *   TRUE, if the file exists and the class exists after file inclusion.
-   *   FALSE, otherwise.
+   * @inheritdoc
    */
   function guessFileCandidate_checkIncludePath($file) {
-    $this->destination = $file;
-    return TRUE;
+    // Include path is not supported when looking for a destination.
+    return FALSE;
   }
 }

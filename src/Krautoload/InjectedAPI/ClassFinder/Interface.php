@@ -24,9 +24,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function guessFile($file);
 
@@ -37,9 +37,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function guessFileCandidate($file);
 
@@ -55,9 +55,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function claimFile($file);
 
@@ -73,9 +73,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function claimFileCandidate($file);
 
@@ -88,9 +88,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function guessFile_checkIncludePath($file);
 
@@ -103,9 +103,9 @@ interface InjectedAPI_ClassFinder_Interface {
    * @param string $file
    *   The file that is supposed to declare the class.
    *
-   * @return boolean
+   * @return boolean|NULL
    *   TRUE, if we are not interested in further candidates.
-   *   FALSE, if we are interested in further candidates.
+   *   FALSE|NULL, if we are interested in further candidates.
    */
   function guessFileCandidate_checkIncludePath($file);
 }
