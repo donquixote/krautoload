@@ -21,14 +21,14 @@ interface SearchableNamespaces_Interface {
   /**
    * Get namespaces.
    *
-   * @param array $namespaces
+   * @return array
+   *   The namespaces.
    */
   function getNamespaces();
 
   /**
    * @param array $namespaces
    *   Namespaces for the new family.
-   *
    * @return SearchableNamespaces_Interface
    *   Newly created namespace family.
    */
@@ -37,7 +37,6 @@ interface SearchableNamespaces_Interface {
   /**
    * @param string $suffix
    *   Namespace suffix to append to each namespace.
-   *
    * @return SearchableNamespaces_Interface
    *   Newly created namespace family.
    */
@@ -48,25 +47,22 @@ interface SearchableNamespaces_Interface {
    * Tell the $api object about each class file that is found.
    *
    * @param InjectedAPI_ClassFileVisitor_Interface $api
-   * @param array $namespaces
+   * @param bool $recursive
    */
   function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, $recursive = FALSE);
 
   /**
    * Visit all namespaces.
    *
-   * @param InjectedAPI_ClassFileVisitor_Interface $api
-   * @param boolean $recursive
+   * @param InjectedAPI_NamespaceInspector_Interface $api
    */
-  function apiVisitNamespaces(InjectedAPI_NamespaceVisitor_Interface $api);
+  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api);
 
   /**
    * Scan all registered namespaces for class files, include each file, and
    * return all classes that actually exist (but no interfaces).
    *
-   * @param InjectedAPI_ClassFileVisitor_Interface $api
    * @param boolean $recursive
-   *
    * @return array
    *   Collected class names.
    */
@@ -76,9 +72,7 @@ interface SearchableNamespaces_Interface {
    * Scan all registered namespaces for class files, and return all names that
    * may be defined as a class or interface within these namespaces.
    *
-   * @param InjectedAPI_ClassFileVisitor_Interface $api
    * @param boolean $recursive
-   *
    * @return array
    *   Collected class names.
    */
@@ -93,6 +87,10 @@ interface SearchableNamespaces_Interface {
    * - Is the class defined after file inclusion?
    *
    * The method can return FALSE even if the class is defined
+   *
+   * @param string $class
+   * @return boolean
+   *   TRUE, if successful.
    */
   function classExistsInNamespaces($class);
 }
