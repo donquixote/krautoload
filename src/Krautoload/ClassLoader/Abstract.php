@@ -35,4 +35,25 @@ abstract class ClassLoader_Abstract implements ClassLoader_Interface {
   function unregister() {
     spl_autoload_unregister(array($this, 'loadClass'));
   }
+
+  function findFile($class) {
+    $api = new InjectedAPI_ClassFinder_FirstExistingFile($class);
+    $this->apiFindFile($api, $class);
+    return $api->getFile();
+  }
+
+  /**
+   * Load a class, and return the file that was successful.
+   *
+   * @param string $class
+   *   The class to load.
+   *
+   * @return string
+   *   The file that defined the class.
+   */
+  function loadClassGetFile($class) {
+    $api = new InjectedAPI_ClassFinder_LoadClassGetFile($class);
+    $this->apiFindFile($api, $class);
+    return $api->getFile();
+  }
 }
