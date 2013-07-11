@@ -4,15 +4,59 @@ namespace Krautoload;
 
 class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_Pluggable_Interface {
 
-  protected $classes = array();
+  /**
+   * Array of classes mapped to files.
+   *
+   * @var array
+   */
+  protected $classMap = array();
+
+  /**
+   * Nested array, where
+   * - the top-level keys are logical base paths obtained from base namespaces,
+   *   each with trailing directory separator.
+   * - the second-level keys are physical base directories,
+   *   each with trailing directory separator.
+   * - the second-level values are NamespacePathPlugin_Interface objects.
+   *
+   * @var array
+   */
   protected $namespaceMap = array();
+
+  /**
+   * Nested array, where
+   * - the top-level keys are logical base paths obtained from base prefixes,
+   *   each with trailing directory separator.
+   * - the second-level keys are physical base directories,
+   *   each with trailing directory separator.
+   * - the second-level values are PrefixPathPlugin_Interface objects.
+   *
+   * @var array
+   */
   protected $prefixMap = array();
 
   /**
    * @inheritdoc
    */
-  public function addClassFile($class, $file_path) {
-    $this->classes[$class][$file_path] = TRUE;
+  public function addClassMap(array $classMap, $override = TRUE) {
+    if (empty($this->classMap)) {
+      $this->classMap = $classMap;
+    }
+    elseif ($override) {
+      $this->classMap = array_merge($classMap, $this->classMap);
+    }
+    else {
+      $this->classMap = array_merge($this->classMap, $classMap);
+    }
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function addClassFile($class, $file, $override = TRUE) {
+    if ($override || !isset($this->classMap[$class])) {
+      $this->classMap[$class] = $file;
+    }
   }
 
   /**
@@ -40,26 +84,9 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
     }
 
     // First check if the literal class name is registered.
-    if (!empty($this->classes[$class])) {
-      foreach ($this->classes[$class] as $file => $skipClassExists) {
-        if (is_file($file)) {
-          if ($skipClassExists) {
-            // Assume that the file does indeed define the class.
-            include $file;
-            return TRUE;
-          }
-          else {
-            // Assume that the file MAY define the class.
-            include_once $file;
-            if (class_exists($class, FALSE)
-              || interface_exists($class, FALSE)
-              || (function_exists('trait_exists') && trait_exists($class, FALSE))
-            ) {
-              return TRUE;
-            }
-          }
-        }
-      }
+    if ($file = $this->classMap[$class]) {
+      require $file;
+      return TRUE;
     }
 
     // Distinguish namespace vs underscore-only.
@@ -97,7 +124,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    * @param string $relativePath
    *   Second part of the canonical path, ending with '.php'.
    *
-   * @return TRUE|NULL
+   * @return bool|NULL
    *   TRUE, if we found the file for the class.
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
@@ -108,6 +135,9 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
     while (TRUE) {
       // Check any plugin registered for this fragment.
       if (!empty($map[$logicalBasePath])) {
+        /**
+         * @var NamespacePathPlugin_Interface|PrefixPathPlugin_Interface $plugin
+         */
         foreach ($map[$logicalBasePath] as $baseDir => $plugin) {
           if ($plugin->pluginLoadClass($class, $baseDir, $relativePath)) {
             return TRUE;
@@ -148,7 +178,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    *   The name of the class, with all namespaces prepended.
    *   E.g. Some\Namespace\Some\Class
    *
-   * @return TRUE|NULL
+   * @return bool|NULL
    *   TRUE, if we found the file for the class.
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
@@ -161,18 +191,9 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
     }
 
     // First check if the literal class name is registered.
-    if (!empty($this->classes[$class])) {
-      foreach ($this->classes[$class] as $file => $skip_class_exists) {
-        if ($skip_class_exists) {
-          if ($api->guessFile($file)) {
-            return TRUE;
-          }
-        }
-        else {
-          if ($api->guessFileCandidate($file)) {
-            return TRUE;
-          }
-        }
+    if ($file = $this->classMap[$class]) {
+      if ($api->claimFile($file)) {
+        return TRUE;
       }
     }
 
@@ -214,7 +235,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    * @param string $relativePath
    *   Second part of the canonical path, ending with '.php'.
    *
-   * @return TRUE|NULL
+   * @return bool|NULL
    *   TRUE, if we found the file for the class.
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
@@ -225,6 +246,9 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
 
       // Check any plugin registered for this fragment.
       if (!empty($map[$logicalBasePath])) {
+        /**
+         * @var NamespacePathPlugin_Interface|PrefixPathPlugin_Interface $plugin
+         */
         foreach ($map[$logicalBasePath] as $baseDir => $plugin) {
           if ($plugin->pluginFindFile($api, $baseDir, $relativePath)) {
             return TRUE;

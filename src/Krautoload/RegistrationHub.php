@@ -62,7 +62,8 @@ class RegistrationHub {
   }
 
   /**
-   * Adds prefixes.
+   * Registers Composer-style PSR-0 prefixes.
+   * These prefixes can apply to both namespaced and non-namespaced classes.
    *
    * @param array $prefixes
    *   Prefixes to add
@@ -74,7 +75,7 @@ class RegistrationHub {
   }
 
   /**
-   * Registers a set of classes
+   * Registers a Composer-style PSR-0 prefix.
    *
    * @param string $prefix
    *   The classes prefix
@@ -231,6 +232,14 @@ class RegistrationHub {
     $logicalBasePath = $this->prefixLogicalPath($prefix);
     $baseDir = strlen($baseDir) ? $baseDir . DIRECTORY_SEPARATOR : '';
     $this->finder->addPrefixPlugin($logicalBasePath, $baseDir, $plugin);
+  }
+
+  /**
+   * @param array $classMap
+   *   An array where the keys are classes, and the values are filenames.
+   */
+  function addClassMap(array $classMap) {
+    $this->finder->addClassMap($classMap);
   }
 
   /**

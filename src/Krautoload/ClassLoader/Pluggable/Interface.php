@@ -16,14 +16,34 @@ namespace Krautoload;
 interface ClassLoader_Pluggable_Interface extends ClassLoader_Interface {
 
   /**
+   * Register an array that maps classes to files.
+   * The loader will assume for each of the given files that this file does
+   * exist, and that its inclusion makes the expected class available.
+   * There will be no class_exists() or file_exists() checks, and there will be
+   * no require_once or include_once.
+   *
+   * @param array $classMap
+   *   An array where the keys are classes, the values are file paths.
+   * @param bool $override
+   *   Whether to override previously added classes.
+   */
+  public function addClassMap(array $classMap, $override = TRUE);
+
+  /**
    * Register a filepath for an individual class.
+   * The loader will assume that the given file does exist, and that its
+   * inclusion makes the expected class available.
+   * There will be no class_exists() or file_exists() checks, and there will be
+   * no require_once or include_once.
    *
    * @param string $class
    *   The fully-qualified class name, e.g. My\Class.
-   * @param string $file_path
+   * @param string $file
    *   The path, e.g. "../lib/My/Class.php".
+   * @param bool $override
+   *   Whether to override previously added classes.
    */
-  public function addClassFile($class, $file_path);
+  public function addClassFile($class, $file, $override);
 
   /**
    * Register a plugin for a namespace and path.
