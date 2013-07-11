@@ -4,7 +4,14 @@ namespace Krautoload;
 
 class RegistrationHub {
 
+  /**
+   * @var ClassLoader_Pluggable_Interface
+   */
   protected $finder;
+
+  /**
+   * @var array
+   */
   protected $plugins = array();
 
   /**
@@ -55,9 +62,7 @@ class RegistrationHub {
     }
     if (is_file($dir . '/composer/autoload_classmap.php')) {
       $class_map = include $dir . '/composer/autoload_classmap.php';
-      foreach ($class_map as $class => $file) {
-        $this->finder->addClassFile($class, $file);
-      }
+      $this->addClassMap($class_map, FALSE);
     }
   }
 
@@ -238,16 +243,16 @@ class RegistrationHub {
    * @param array $classMap
    *   An array where the keys are classes, and the values are filenames.
    */
-  function addClassMap(array $classMap) {
-    $this->finder->addClassMap($classMap);
+  function addClassMap(array $classMap, $override = FALSE) {
+    $this->finder->addClassMap($classMap, $override);
   }
 
   /**
    * @param string $class
    * @param string $file
    */
-  function addClassFile($class, $file) {
-    $this->finder->addClassFile($class, $file);
+  function addClassFile($class, $file, $override = TRUE) {
+    $this->finder->addClassFile($class, $file, $override);
   }
 
   /**

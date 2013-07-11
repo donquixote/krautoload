@@ -43,7 +43,7 @@ interface ClassLoader_Pluggable_Interface extends ClassLoader_Interface {
    * @param bool $override
    *   Whether to override previously added classes.
    */
-  public function addClassFile($class, $file, $override);
+  public function addClassFile($class, $file, $override = TRUE);
 
   /**
    * Register a plugin for a namespace and path.
