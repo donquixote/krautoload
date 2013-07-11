@@ -66,5 +66,5 @@ interface ClassLoader_Interface {
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
    */
-  public function apiFindFile($api, $class);
+  public function apiFindFile(InjectedAPI_ClassFinder_Interface $api, $class);
 }

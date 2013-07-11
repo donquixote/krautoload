@@ -153,7 +153,7 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.
    */
-  public function apiFindFile($api, $class) {
+  public function apiFindFile(InjectedAPI_ClassFinder_Interface $api, $class) {
 
     // Discard initial namespace separator.
     if ('\\' === $class[0]) {
