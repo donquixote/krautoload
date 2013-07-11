@@ -12,7 +12,7 @@ class Krautoload {
    * @return \Krautoload\RegistrationHub
    * @throws Exception
    */
-  static function start(array $options) {
+  static function start(array $options = array()) {
 
     if (isset(self::$hub)) {
       throw new Exception("Krautoload::start() can be called only once.");
@@ -68,6 +68,8 @@ class Krautoload {
       case 'XCache':
       case 'WinCache':
         if (isset($options['cache_prefix'])) {
+          // Load one more class that we will need.
+          require_once $basedir . '/InjectedAPI/ClassFinder/LoadClassGetFile.php';
           // Build the cache decorator object.
           $cachedLoaderClass = 'Krautoload\ClassLoader_Cached_' . $options['cache'];
           $cachedLoader = new $cachedLoaderClass($loader, $options['cache_prefix']);
