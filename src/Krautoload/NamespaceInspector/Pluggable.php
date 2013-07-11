@@ -64,7 +64,7 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
    *   The namespace, e.g. 'MyVendor\\MyPackage\\'.
    */
   protected function apiInspectNamespace(InjectedAPI_NamespaceInspector_Interface $api, $namespace) {
-    
+
     $logicalPath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
     $logicalBasePath = $logicalPath;
     $relativePath = '';

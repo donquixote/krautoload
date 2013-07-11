@@ -53,7 +53,7 @@ class ApiClassFinder {
    * @param string $dir
    *   The deep filesystem location, e.g. "../lib/My/Prefix".
    * @param FinderPlugin_Interface $plugin
-   *   The plugin. See 
+   *   The plugin. See
    */
   public function registerPrefixPathPlugin($prefix_path_fragment, $dir, $plugin) {
     $this->prefixMap[$prefix_path_fragment][$dir] = $plugin;
@@ -119,7 +119,7 @@ class ApiClassFinder {
    * $psr_0_root . '/' . $path_fragment . $path_suffix
    *
    * @param array $map
-   *   Either the namespace map or the prefix 
+   *   Either the namespace map or the prefix
    * @param InjectedAPI $api
    *   API object with a suggestFile() method.
    *   We are supposed to call $api->suggestFile($file) with all suggestions we
