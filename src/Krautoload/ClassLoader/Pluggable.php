@@ -62,15 +62,15 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
   /**
    * @inheritdoc
    */
-  public function addNamespacePlugin($logicalPath, $dir, NamespacePathPlugin_Interface $plugin) {
-    $this->namespaceMap[$logicalPath][$dir] = $plugin;
+  public function addNamespacePlugin($logicalBasePath, $baseDir, NamespacePathPlugin_Interface $plugin) {
+    $this->namespaceMap[$logicalBasePath][$baseDir] = $plugin;
   }
 
   /**
    * @inheritdoc
    */
-  public function addPrefixPlugin($logicalBasePath, $dir, PrefixPathPlugin_Interface $plugin) {
-    $this->prefixMap[$logicalBasePath][$dir] = $plugin;
+  public function addPrefixPlugin($logicalBasePath, $baseDir, PrefixPathPlugin_Interface $plugin) {
+    $this->prefixMap[$logicalBasePath][$baseDir] = $plugin;
   }
 
   /**
