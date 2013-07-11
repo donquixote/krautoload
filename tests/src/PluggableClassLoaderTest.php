@@ -22,9 +22,15 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testLoadClass() {
+    $this->hub->addClassMap(array(
+      'ClassMap\Foo\Bar' => $this->getFixturesSubdir('src-classmap') . '/classmap-foo-bar.php',
+      'ClassMap\Foo\Baz' => $this->getFixturesSubdir('src-classmap') . '/classmap-foo-baz.php',
+    ));
     $this->hub->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
     $this->hub->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
     $this->hub->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
+    $this->assertLoadClass('ClassMap\Foo\Bar');
+    $this->assertLoadClass('ClassMap\Foo\Baz');
     $this->assertLoadClass('Namespaced2\Foo');
     $this->assertLoadClass('Pearlike2_Foo');
     $this->assertLoadClass('MyVendor\MyPackage\Foo\Bar');
