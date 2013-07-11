@@ -14,11 +14,11 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   /**
    * @var k\NamespaceInspector_Interface
    */
-  protected $finder;
+  protected $inspector;
 
   public function setUp() {
-    $this->finder = new k\NamespaceInspector_Pluggable();
-    $this->hub = new k\RegistrationHub($this->finder);
+    $this->inspector = new k\NamespaceInspector_Pluggable();
+    $this->hub = new k\RegistrationHub($this->inspector);
   }
 
   public function testDiscoveryPSR0() {
@@ -32,12 +32,12 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
 
     // Run the discovery.
-    $this->finder->apiVisitNamespaceClassFiles($api, 'Namespace_With_Underscore', TRUE);
+    $this->hub->buildSearchableNamespaces(array('Namespace_With_Underscore'))->apiVisitClassFiles($api, TRUE);
 
     // Verify the result.
     $called = $api->mockGetCalled();
 
-    $this->assertEquals($called[0], array('setNamespace', array('Namespace_With_Underscore')));
+    $this->assertEquals($called[0], array('setNamespace', array('Namespace_With_Underscore\\')));
 
     $this->assertArraySlice($called, 1, 2, array(
       array(
@@ -45,9 +45,9 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
         array(
           $psr0 . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
           array(
-            '\Sub_Namespace\Foo\BarUnsafe',
-            '\Sub_Namespace\Foo_BarUnsafe',
-            '\Sub_Namespace_Foo_BarUnsafe',
+            'Sub_Namespace\Foo\BarUnsafe',
+            'Sub_Namespace\Foo_BarUnsafe',
+            'Sub_Namespace_Foo_BarUnsafe',
           ),
         ),
       ),
@@ -56,9 +56,9 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
         array(
           $psr0 . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
           array(
-            '\Sub_Namespace\Foo\Bar',
-            '\Sub_Namespace\Foo_Bar',
-            '\Sub_Namespace_Foo_Bar',
+            'Sub_Namespace\Foo\Bar',
+            'Sub_Namespace\Foo_Bar',
+            'Sub_Namespace_Foo_Bar',
           ),
         ),
       ),
@@ -72,61 +72,98 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->finder->apiVisitNamespaceClassFiles($api, 'MyVendor\MyPackage', TRUE);
+    $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
-    $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage')));
+    $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage\\')));
 
     $this->assertArraySlice($called, 1, 1, array(
       array(
         'fileWithClass',
         array(
           $psrx . '/Foo/Bar.php',
-          '\Foo\Bar',
+          'Foo\Bar',
         ),
       ),
     ));
+  }
+
+  public function testDiscoveryPSRXChild() {
+
+    // Register PSR-X namespace.
+    $psrx = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->finder->apiVisitNamespaceClassFiles($api, 'MyVendor\MyPackage\Foo', TRUE);
+    $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage\Foo'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
-    $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage\Foo')));
+    $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage\Foo\\')));
 
     $this->assertArraySlice($called, 1, 1, array(
       array(
         'fileWithClass',
         array(
           $psrx . '/Foo/Bar.php',
-          '\Bar',
+          'Bar',
         ),
       ),
     ));
+  }
+
+  public function testDiscoveryPSRXParent() {
+
+    // Register PSR-X namespace.
+    $psrx = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->finder->apiVisitNamespaceClassFiles($api, 'MyVendor', TRUE);
+    $this->hub->buildSearchableNamespaces(array('MyVendor'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
-    $this->assertEquals($called[0], array('setNamespace', array('MyVendor')));
+    $this->assertEquals($called[0], array('setNamespace', array('MyVendor\\')));
 
-    /*
     $this->assertArraySlice($called, 1, 1, array(
       array(
         'fileWithClass',
         array(
           $psrx . '/Foo/Bar.php',
-          '\MyPackage\Foo\Bar',
+          'MyPackage\Foo\Bar',
         ),
       ),
     ));
-    */
+  }
+
+  public function testDiscoveryPSRXRoot() {
+
+    // Register PSR-X namespace.
+    $psrx = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+
+
+    $api = new k\InjectedAPI_ClassFileVisitor_Mock();
+    $this->hub->buildSearchableNamespaces(array(''))->apiVisitClassFiles($api, TRUE);
+    $called = $api->mockGetCalled();
+
+    $this->assertEquals($called[0], array('setNamespace', array('')));
+
+    $this->assertArraySlice($called, 1, 1, array(
+      array(
+        'fileWithClass',
+        array(
+          $psrx . '/Foo/Bar.php',
+          'MyVendor\MyPackage\Foo\Bar',
+        ),
+      ),
+    ));
   }
 
   protected function assertArraySlice($array, $offset, $count, $compare) {
     $slice = array_slice($array, $offset, $count);
     $this->sortBySerializing($slice);
     $this->sortBySerializing($compare);
-    $this->assertEquals($slice, $compare);
+    $this->assertEquals($compare, $slice);
   }
 
   protected function sortBySerializing(&$array) {

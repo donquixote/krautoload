@@ -4,17 +4,31 @@ namespace Krautoload;
 
 abstract class InjectedAPI_ClassFileVisitor_Abstract implements InjectedAPI_ClassFileVisitor_Interface {
 
-  protected $nsp;
+  /**
+   * The current namespace, with trailing separator, if not emtpy.
+   *
+   * @var string
+   */
+  protected $namespace;
 
+  /**
+   * @inheritdoc
+   */
   function setNamespace($namespace) {
-    return $this->nsp = $namespace;
+    $this->namespace = $namespace;
   }
 
+  /**
+   * @inheritdoc
+   */
   function getNamespace() {
-    return $this->nsp;
+    return $this->namespace;
   }
 
+  /**
+   * @inheritdoc
+   */
   function getClassName($relativeClassName) {
-    return $this->nsp . $relativeClassName;
+    return $this->namespace . $relativeClassName;
   }
 }

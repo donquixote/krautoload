@@ -56,7 +56,7 @@ interface SearchableNamespaces_Interface {
    *
    * @param InjectedAPI_NamespaceInspector_Interface $api
    */
-  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api);
+  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE);
 
   /**
    * Scan all registered namespaces for class files, include each file, and

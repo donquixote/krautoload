@@ -14,7 +14,7 @@ abstract class InjectedAPI_NamespaceInspector_ScanAbstract implements InjectedAP
   }
 
   /**
-   * @param string $namespace
+   * @inheritdoc
    */
   function setNamespace($namespace) {
     $this->api->setNamespace($namespace);

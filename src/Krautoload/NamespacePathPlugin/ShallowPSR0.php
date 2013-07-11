@@ -4,6 +4,9 @@ namespace Krautoload;
 
 class NamespacePathPlugin_ShallowPSR0 implements NamespacePathPlugin_Interface {
 
+  /**
+   * @inheritdoc
+   */
   function pluginFindFile($api, $baseDir, $relativePath) {
 
     // Replace the underscores after the last directory separator.
@@ -22,6 +25,9 @@ class NamespacePathPlugin_ShallowPSR0 implements NamespacePathPlugin_Interface {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function pluginLoadClass($class, $baseDir, $relativePath) {
 
     // Replace the underscores after the last directory separator.
@@ -44,30 +50,50 @@ class NamespacePathPlugin_ShallowPSR0 implements NamespacePathPlugin_Interface {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function pluginScanNamespace($api, $baseDir, $relativePath) {
     if (is_dir($dir = $baseDir . $relativePath)) {
+      /**
+       * @var \DirectoryIterator $fileinfo
+       */
       foreach (new \DirectoryIterator($dir) as $fileinfo) {
         // @todo With PHP 5.3.6, this could be $fileinfo->getExtension().
         if (pathinfo($fileinfo->getFilename(), PATHINFO_EXTENSION) == 'php') {
-          $api->fileWithClassCandidates($fileinfo->getPathname(), array('\\' . $fileinfo->getBasename('.php')));
+          $api->fileWithClassCandidates($fileinfo->getPathname(), array($fileinfo->getBasename('.php')));
         }
       }
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function pluginScanRecursive($api, $baseDir, $relativePath) {
-    if (is_array($baseDir)) {
-      throw new \Exception("Base dir must not be array.");
-    }
-    if (is_array($relativePath)) {
-      throw new \Exception("Relative path must not be array.");
-    }
     if (is_dir($dir = $baseDir . $relativePath)) {
       $this->doScanRecursive($api, $dir);
     }
   }
 
-  protected function doScanRecursive($api, $dir, $relativeNamespaces = array('\\')) {
+  /**
+   * @inheritdoc
+   */
+  function pluginScanParentRecursive($api, $baseDir, $relativeBaseNamespace) {
+    if (is_dir($baseDir)) {
+      $this->doScanRecursive($api, $baseDir, array($relativeBaseNamespace));
+    }
+  }
+
+  /**
+   * @param InjectedAPI_ClassFileVisitor_Interface $api
+   * @param string $dir
+   * @param array $relativeNamespaces
+   */
+  protected function doScanRecursive($api, $dir, $relativeNamespaces = array('')) {
+    /**
+     * @var \DirectoryIterator $fileinfo
+     */
     foreach (new \DirectoryIterator($dir) as $fileinfo) {
       // @todo With PHP 5.3.6, this could be $fileinfo->getExtension().
       if (pathinfo($fileinfo->getFilename(), PATHINFO_EXTENSION) == 'php') {

@@ -10,18 +10,27 @@ namespace Krautoload;
  */
 abstract class InjectedAPI_ClassFileVisitor_IncludeEachAbstract extends InjectedAPI_ClassFileVisitor_Abstract {
 
+  /**
+   * @inheritdoc
+   */
   function fileWithClass($file, $relativeClassName) {
     include_once $file;
     $this->includedFileWithClassCandidate($file, $relativeClassName);
   }
 
-  function fileWithClassCandidates($file, $relativeClassNames) {
+  /**
+   * @inheritdoc
+   */
+  function fileWithClassCandidates($file, array $relativeClassNames) {
     include_once $file;
     foreach ($relativeClassNames as $relativeClassName) {
       $this->includedFileWithClassCandidate($file, $relativeClassName);
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   protected function includedFileWithClassCandidate($file, $relativeClassName) {
     if (class_exists($class = $this->getInterface() . $relativeClassName, FALSE)) {
       $this->confirmedFileWithClass($file, $class);
@@ -34,12 +43,24 @@ abstract class InjectedAPI_ClassFileVisitor_IncludeEachAbstract extends Injected
     }
   }
 
+  /**
+   * @param string $file
+   * @param string $class
+   */
   abstract protected function confirmedFileWithClass($file, $class);
 
+  /**
+   * @param string $file
+   * @param string $interface
+   */
   protected function confirmedFileWithInterface($file, $interface) {
     // Do nothing by default.
   }
 
+  /**
+   * @param string $file
+   * @param string $trait
+   */
   protected function confirmedFileWithTrait($file, $trait) {
     // Do nothing by default.
   }

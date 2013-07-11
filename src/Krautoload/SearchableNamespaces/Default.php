@@ -83,16 +83,14 @@ class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
       ? new InjectedAPI_NamespaceInspector_ScanRecursive($api)
       : new InjectedAPI_NamespaceInspector_ScanNamespace($api)
     ;
-    $this->apiInspectNamespaces($namespaceVisitorAPI);
+    $this->apiInspectNamespaces($namespaceVisitorAPI, $recursive);
   }
 
   /**
    * @inheritdoc
    */
-  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api) {
-    foreach ($this->namespaces as $namespace) {
-      $this->finder->apiInspectNamespace($api, $namespace);
-    }
+  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE) {
+    $this->finder->apiInspectNamespaces($api, $this->namespaces, $recursive);
   }
 
   /**
