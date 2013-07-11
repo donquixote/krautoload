@@ -5,6 +5,15 @@ namespace Krautoload;
 class ClassLoader_Cached_XCache extends ClassLoader_Cached_AbstractPrefixBased {
 
   /**
+   * @throws \RuntimeException
+   */
+  protected function checkRequirements() {
+    if (!extension_loaded('Xcache')) {
+      throw new \RuntimeException('Unable to use XCache class loader, as XCache is not enabled.');
+    }
+  }
+
+  /**
    * @inheritdoc
    */
   public function loadClass($class) {
@@ -16,7 +25,7 @@ class ClassLoader_Cached_XCache extends ClassLoader_Cached_AbstractPrefixBased {
       }
     }
     else {
-      xcache_set($this->prefix . $class, $this->finder->loadClassGetFile($class));
+      xcache_set($this->prefix . $class, $this->decorated->loadClassGetFile($class));
     }
   }
 }

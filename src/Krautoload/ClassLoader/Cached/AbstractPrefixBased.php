@@ -8,21 +8,21 @@ abstract class ClassLoader_Cached_AbstractPrefixBased extends ClassLoader_Cached
 
   /**
    *
-   * @param ClassFinder_Interface $finder
+   * @param ClassLoader_Interface $decorated
    *   Another ClassFinder to delegate to, if the class is not in the cache.
    * @param string $prefix
    *   A prefix for the storage key in APC, XCache, etc.
    * @throws \RuntimeException
    */
-  function __construct(ClassFinder_Interface $finder, $prefix) {
+  function __construct(ClassLoader_Interface $decorated, $prefix) {
 
-    if (!extension_loaded('apc') || !function_exists('apc_store')) {
-      throw new \RuntimeException('Unable to use Krautoload\ClassLoader_ApcCache, because APC is not enabled.');
-    }
+    $this->checkRequirements();
 
     $this->prefix = $prefix;
-    parent::__construct($finder);
+    parent::__construct($decorated);
   }
+
+  abstract protected function checkRequirements();
 
   /**
    * Set the cache prefix after a flush cache.
