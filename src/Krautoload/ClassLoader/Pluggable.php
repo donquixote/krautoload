@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_Pluggable_Interface {
+class _ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_Pluggable_Interface {
 
   /**
    * Array of classes mapped to files.
@@ -275,4 +275,11 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
       }
     }
   }
+}
+
+if ('/' === DIRECTORY_SEPARATOR ) {
+  require_once dirname(__FILE__) . '/Pluggable.SLASH.php';
+}
+else {
+  require_once dirname(__FILE__) . '/Pluggable.OTHER.php';
 }
