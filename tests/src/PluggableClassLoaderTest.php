@@ -12,26 +12,22 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
   protected $hub;
 
   /**
-   * @var k\ClassLoader_Interface
+   * @var k\ClassLoader_Pluggable_Interface
    */
   protected $loader;
 
-  /**
-   * @var k\ClassFinder_Pluggable_Interface
-   */
-  protected $finder;
-
   public function setUp() {
-    $this->finder = new k\ClassLoader_Pluggable();
-    $this->hub = new k\RegistrationHub($this->finder);
-    $this->loader = $this->finder;
+    $this->loader = new k\ClassLoader_Pluggable();
+    $this->hub = new k\RegistrationHub($this->loader);
   }
 
   public function testLoadClass() {
     $this->hub->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
     $this->hub->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
     $this->assertLoadClass('Namespaced2\Foo');
     $this->assertLoadClass('Pearlike2_Foo');
+    $this->assertLoadClass('MyVendor\MyPackage\Foo\Bar');
   }
 
   public function testExotic() {
@@ -68,7 +64,7 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
 
     // Register a plugin that can handle include path.
     $plugin = new k\PrefixPathPlugin_ShallowPEAR_UseIncludePath();
-    $this->finder->addPrefixPlugin('', '', $plugin);
+    $this->hub->addPrefixPlugin('', '', $plugin);
 
     $this->assertNotLoadClass('Foo', "Class 'Foo' still undefined after ->loadClass() without include path.");
 
