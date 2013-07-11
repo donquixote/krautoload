@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-class ClassLoader_ApcCache extends ClassLoader_NoCache {
+class ClassLoader_Cached_ApcCache extends ClassLoader_Cached_Abstract {
 
   protected $prefix;
 
@@ -12,11 +12,11 @@ class ClassLoader_ApcCache extends ClassLoader_NoCache {
    *   Another ClassFinder to delegate to, if the class is not in the cache.
    * @param string $prefix
    *   A prefix for the storage key in APC.
-   * @throws Exception
+   * @throws \RuntimeException
    */
   function __construct(ClassFinder_Interface $finder, $prefix) {
     if (!extension_loaded('apc') || !function_exists('apc_store')) {
-      throw new Exception('Unable to use Krautoload\ClassLoader_ApcCache, because APC is not enabled.');
+      throw new \RuntimeException('Unable to use Krautoload\ClassLoader_ApcCache, because APC is not enabled.');
     }
     $this->prefix = $prefix;
     parent::__construct($finder);
@@ -33,13 +33,11 @@ class ClassLoader_ApcCache extends ClassLoader_NoCache {
   }
 
   /**
-   * Callback for class loading. This will include ("require") the file found.
-   *
-   * @param string $class
-   *   The class to load.
+   * @inheritdoc
    */
   function loadClass($class) {
 
+    // @todo: What is stored in APC cache, if the class does not exist? False or NULL?
     if (
       (FALSE === $file = apc_fetch($this->prefix . $class)) ||
       (!empty($file) && !is_file($file))
