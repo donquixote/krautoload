@@ -54,7 +54,7 @@ class Krautoload {
     // Wire up the class finder so it can find Krautoload classes.
     // Krautoload uses PSR-0 with only underscores after the package namespace.
     $plugin = new Krautoload\NamespacePathPlugin_ShallowPSR0_AllUnderscore();
-    $loader->addNamespacePlugin('Krautoload/', $basedir . DIRECTORY_SEPARATOR, $plugin);
+    $loader->addNamespacePlugin('Krautoload' . DIRECTORY_SEPARATOR, $basedir . DIRECTORY_SEPARATOR, $plugin);
 
     // Register the loader to the spl stack.
     $loader->register();
