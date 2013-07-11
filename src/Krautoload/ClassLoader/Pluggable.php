@@ -84,8 +84,8 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
     }
 
     // First check if the literal class name is registered.
-    if ($file = $this->classMap[$class]) {
-      require $file;
+    if (isset($this->classMap[$class])) {
+      require $this->classMap[$class];
       return TRUE;
     }
 
@@ -191,8 +191,8 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
     }
 
     // First check if the literal class name is registered.
-    if ($file = $this->classMap[$class]) {
-      if ($api->claimFile($file)) {
+    if (isset($this->classMap[$class])) {
+      if ($api->claimFile($this->classMap[$class])) {
         return TRUE;
       }
     }
