@@ -1,26 +1,45 @@
 [![Build Status](https://secure.travis-ci.org/donquixote/krautoload.png)](https://travis-ci.org/donquixote/krautoload)
 
-Krautoload is a pluggable PHP class autoloader library that makes you fantasize of Kartoffelbrei, Kasseler and Sauerkraut.
-It has native support for
-- [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
-- Variation of PSR-0 which allows shallow directory structures.
-- PEAR (that is the old-school pattern with underscores instead of namespaces)
-- Variation of PEAR which allows shallow directory structures.
+Krautoload is a pluggable PHP class autoloader library.
+In addition, it can do class discovery based on the same mappings registered in the class loader.
+
+The class loader has native support for
+- Class maps.
 - The [proposed PSR-X](https://github.com/php-fig/fig-standards/blob/master/proposed/autoloader.md), which is a shallow-dir variation of PSR-0 without the special underscore handling.
+- [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
+- PEAR (that is the old-school pattern with underscores instead of namespaces)  
+  (yes, this is just a subset of PSR-0, but Krautoload has explicit support for it)
+- Variations of PSR-0 with different levels of "safety" (to avoid duplicate file inclusion, etc)
 
-Besides that, custom plugins can be mapped to any namespaces and prefixes.  
-This way, you can easily support old-school libraries which don't support any standards, without bloating the SPL autoload stack.
+It also supports some "non-standard" stuff, *just because we can*, and it was too tempting not to do it:
+- Variation of PSR-0 which allows shallow directory structures.
+- Variation of PEAR which allows shallow directory structures.
 
-Krautoload is designed to perform equally well no matter how many namespaces are registered.
+Besides that, custom plugins can be mapped to any namespaces and prefixes, to allow the most wonky logical mappings.  
+E.g. there is an example plugin "CamelSwap", that would map a class ".._TinyPetShop" to "../shop/pet/tiny.php".
+(the idea is to support old-school libraries which still have *some logic* in where they put their classes)
+
+
+### Performance
+
+The basic Krautoload "pluggable" class loader is designed to have a decent performance, that does no have to be afraid of competition.
+Especially, the main lookup algorithm is designed to perform equally well no matter how many namespaces are registered.
+(even if most of these namespaces all share the same prefix)
+
+If that is not enough, there are different cache decorators, mostly equivalent with those you find in Symfony2:
+- APC cache
+- XCache
+- WinCache
+- Generated class maps
+  - Note: That's not a decorator, but can still speed you up.
+  - Krautoload can't generate its own class maps, but there are enough tools out there which can.
 
 
 ## Project status and history
 
-The project is to be considered in "Preview" status.  
-It should work ok, but API details may still change based on community feedback.
+The project has changed a lot in recent days and weeks, but it is now probably quite close to a stable shape.  
+Still, some API details may still change based on community feedback.  
 Especially, the term "PSR-X" may change in the future, if it gets accepted.
-
-A cache layer (APC) basically exist, but is not accessible yet.
 
 The project is a spin-off of the ["xautoload" module for Drupal](http://drupal.org/project/xautoload), with some changes.  
 
@@ -31,13 +50,13 @@ It is optimized for PSR-X, and needs a tiny-tiny extra operation if wired up wit
 ## Purpose / Audience
 
 Modern PHP projects typically use class loading solutions shipped with the framework, or provided by Composer.
-Thus, Krautoload is mainly aimed at framework developers, for copying or inspiration.
+Thus, Krautoload is mainly aimed at framework developers, for full inclusion, copying, or inspiration.
 
 
 ## Usage
 
 Krautoload provides a start-off class with static methods, for those who want to avoid a lengthy bootstrap.  
-Alternative bootstrap helpers may be provided based on your feedback.
+Alternative bootstrap helpers may be provided based on community feedback.
 
 ```php
 require_once "$path_to_krautoload/src/Krautoload.php";
@@ -46,7 +65,7 @@ require_once "$path_to_krautoload/src/Krautoload.php";
 $krautoload = Krautoload::start();
 
 // Register additional namespaces
-$krautoload->namespacePSR0('FooVendor\FooPackage', "$path_to_foo_package/src");
+$krautoload->addNamespacePSR0('FooVendor\FooPackage', "$path_to_foo_package/src");
 
 new FooVendor\FooPackage\Foo\Bar\Baz();
 ```
@@ -66,14 +85,41 @@ $krautoload->composerVendorDir($vendor_dir);
 ```
 
 
+### Class discovery
+
+You need
+- a "NamespaceInspector" object (which is a more powerful version of the ClassLoader)
+- a "SearchableNamespaces" object, using the namespace inspector.
+- Then you can do class discovery within those namespaces.
+
+```php
+// Start Krautoload with discovery capabilities.
+// This means, it will create a NamespaceInspector instead of a ClassLoader.
+// The only overhead this adds is *two* additional files being loaded (one class, one interface).
+// So, no reason not to.
+$krautoload = Krautoload::start(array('introspection' => TRUE));
+// Register your stuff
+$krautoload->addPrefix...
+$krautoload->addNamespace...
+// Class loading should work now.
+new MyVendor\MyPackage\Foo\Bar();
+// Create searchable namespaces object.
+$searchableNamespaces = $krautoload->buildSearchableNamespaces(array(
+  'MyVendor\MyPackage\Foo1',
+  'MyVendor\MyPackage\Foo2',
+));
+// Scan those namespaces
+$recursive = TRUE;
+$classes = $searchableNamespaces->discoverExistingClasses($recursive);
+```
+
+
 ## Unit tests
 
-Krautoload is designed to be unit-testable, better than other class loaders.  
-Its architecture allows to mock out and simulate all hits to the filesystem (file_exists(), require_once, etc).
+Tests exist, but coverage is still not fully acceptable. This is why Travis complains.  
+https://travis-ci.org/donquixote/krautoload
 
-Unfortunately, I have no experience with testing frameworks outside of Drupal (yet).  
-Thus, no tests exist yet.  
-(but there are tests in Drupal xautoload, which show that the architecture is ok)
+Any help is appreciated.
 
 
 ## Benchmarks
