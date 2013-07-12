@@ -11,7 +11,9 @@ class BootstrapTest extends \PHPUnit_Framework_TestCase {
   }
 
   function testBootstrapApc() {
-    $this->runTestScript('testrun-apc.php');
+    if (extension_loaded('apc') && function_exists('apc_store')) {
+      $this->runTestScript('testrun-apc.php');
+    }
   }
 
   protected function runTestScript($script, $expected = 'SUCCESS') {
