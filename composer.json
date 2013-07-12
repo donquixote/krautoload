@@ -25,5 +25,5 @@
             "Krautoload\\": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "alpha"
 }
