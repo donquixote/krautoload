@@ -16,6 +16,10 @@
     "require": {
         "php": ">=5.3.3"
     },
+    "require-dev": {
+        "phpunit/php-invoker": ">=1.1.2",
+        "phpunit/phpunit": ">=3.7"
+    },
     "autoload": {
         "psr-0": {
             "Krautoload\\": "src/"
