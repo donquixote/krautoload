@@ -5,6 +5,12 @@
  * File to test the bootstrap.
  */
 
+if (!extension_loaded('apc') || !function_exists('apc_store')) {
+  print "APC not available. Aborting.\n";
+  return;
+}
+
+
 require_once 'src/Krautoload.php';
 $krautoload = Krautoload::start(array(
   'cache' => 'ApcCache',
@@ -28,7 +34,7 @@ if (class_exists('ClassMap\Foo\Baz')) {
 }
 
 // Manually add the class to the APC cache.
-apc_store($prefix . 'ClassMap\Foo\Baz', 'tests/fixtures/src-classmap/classmap-foo-baz.php');
+apc_store($key = $prefix . 'ClassMap\Foo\Baz', 'tests/fixtures/src-classmap/classmap-foo-baz.php', 10);
 
 new ClassMap\Foo\Baz;
 
