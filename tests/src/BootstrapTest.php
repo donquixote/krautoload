@@ -12,13 +12,13 @@ class BootstrapTest extends \PHPUnit_Framework_TestCase {
 
   function testBootstrapApc() {
     if (extension_loaded('apc') && function_exists('apc_store')) {
-      $this->runTestScript('testrun-apc.php');
+      $this->runTestScript('testrun-apc.php', '-d apc.enable_cli=1');
     }
   }
 
-  protected function runTestScript($script, $expected = 'SUCCESS') {
+  protected function runTestScript($script, $options = '', $expected = 'SUCCESS') {
     ob_start();
-    system('php tests/scripts/' . $script);
+    system('php ' . $options . ' tests/scripts/' . $script);
     $response = ob_get_clean();
     $this->assertEquals('SUCCESS', $response);
   }
