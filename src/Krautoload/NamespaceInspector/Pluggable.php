@@ -8,18 +8,28 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
    * @inheritdoc
    */
   public function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces, $recursive) {
-    foreach ($namespaces as &$namespace) {
-      $namespace = trim($namespace, '\\') . '\\';
-      if ('\\' === $namespace) {
-        $namespace = '';
-      }
-    }
+    $namespaces = $this->normalizeNamespaces($namespaces);
     if ($recursive) {
       $this->apiInspectNamespacesRecursive($api, $namespaces);
     }
     foreach ($namespaces as $namespace) {
       $this->apiInspectNamespace($api, $namespace);
     }
+  }
+
+  /**
+   * @param array $namespaces
+   */
+  protected function normalizeNamespaces(array $namespaces) {
+    $normalized = array();
+    foreach ($namespaces as $namespace) {
+      $namespace = trim($namespace, '\\') . '\\';
+      if ('\\' === $namespace) {
+        $namespace = '';
+      }
+      $normalized[$namespace] = $namespace;
+    }
+    return $normalized;
   }
 
   /**

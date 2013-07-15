@@ -4,6 +4,9 @@ namespace Krautoload\Tests;
 
 use Krautoload as k;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
 
   /**
@@ -24,27 +27,38 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   public function testDiscoveryPSR0() {
 
     // Register PSR-0 namespace.
-    $psr0 = $this->getFixturesSubdir('src-psr0');
-    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $psr0);
+    $dir = $this->getFixturesSubdir('src-psr0');
+    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $dir);
+    $this->hub->addNamespacePSR0('Namespaced', $dir);
+    $this->hub->addNamespacePSR0('Namespaced2', $dir);
 
     // Build the mock $api object.
     // We can't use the mock stuff shipped with PHPUnit, because we need a specific order of calls.
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
 
     // Run the discovery.
-    $this->hub->buildSearchableNamespaces(array('Namespace_With_Underscore'))->apiVisitClassFiles($api, TRUE);
+    $this->hub->buildSearchableNamespaces(array(
+      'Namespace_With_Underscore',
+      'Namespaced',
+      'Namespace_With_Underscore\Sub_Namespace',
+    ))->apiVisitClassFiles($api, TRUE);
 
     // Verify the result.
     $called = $api->mockGetCalled();
 
+    // The InjectedAPI object is being told about the to-be-inspected namespace.
     $this->assertEquals($called[0], array('setNamespace', array('Namespace_With_Underscore\\')));
 
+    // The two class files for this namespace may be discovered in any order.
     $this->assertArraySlice($called, 1, 2, array(
       array(
         'fileWithClassCandidates',
         array(
-          $psr0 . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
           array(
+            // Class names are given relative to the inspected namespace.
+            // There are three class names that could be defined in the file.
+            // They are expected in this exact order.
             'Sub_Namespace\Foo\BarUnsafe',
             'Sub_Namespace\Foo_BarUnsafe',
             'Sub_Namespace_Foo_BarUnsafe',
@@ -54,11 +68,70 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
       array(
         'fileWithClassCandidates',
         array(
-          $psr0 . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
           array(
             'Sub_Namespace\Foo\Bar',
             'Sub_Namespace\Foo_Bar',
             'Sub_Namespace_Foo_Bar',
+          ),
+        ),
+      ),
+    ));
+
+    $this->assertEquals($called[3], array('setNamespace', array('Namespaced\\')));
+
+    // The three class files for this namespace may be discovered in any order.
+    $this->assertArraySlice($called, 4, 3, array(
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespaced/Foo.php',
+          array(
+            'Foo',
+          ),
+        ),
+      ),
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespaced/Bar.php',
+          array(
+            'Bar',
+          ),
+        ),
+      ),
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespaced/Baz.php',
+          array(
+            'Baz',
+          ),
+        ),
+      ),
+    ));
+
+    $this->assertEquals($called[7], array('setNamespace', array('Namespace_With_Underscore\\Sub_Namespace\\')));
+
+    // The two class files for this namespace may be discovered in any order.
+    $this->assertArraySlice($called, 8, 2, array(
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
+          array(
+            'Foo\BarUnsafe',
+            'Foo_BarUnsafe',
+          ),
+        ),
+      ),
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
+          array(
+            'Foo\Bar',
+            'Foo_Bar',
           ),
         ),
       ),
@@ -68,8 +141,8 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   public function testDiscoveryPSRX() {
 
     // Register PSR-X namespace.
-    $psrx = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+    $dir = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
     $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage'))->apiVisitClassFiles($api, TRUE);
@@ -81,7 +154,7 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
       array(
         'fileWithClass',
         array(
-          $psrx . '/Foo/Bar.php',
+          $dir . '/Foo/Bar.php',
           'Foo\Bar',
         ),
       ),
@@ -91,8 +164,8 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   public function testDiscoveryPSRXChild() {
 
     // Register PSR-X namespace.
-    $psrx = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+    $dir = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
     $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage\Foo'))->apiVisitClassFiles($api, TRUE);
@@ -104,7 +177,7 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
       array(
         'fileWithClass',
         array(
-          $psrx . '/Foo/Bar.php',
+          $dir . '/Foo/Bar.php',
           'Bar',
         ),
       ),
@@ -114,8 +187,8 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   public function testDiscoveryPSRXParent() {
 
     // Register PSR-X namespace.
-    $psrx = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+    $dir = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
@@ -128,7 +201,7 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
       array(
         'fileWithClass',
         array(
-          $psrx . '/Foo/Bar.php',
+          $dir . '/Foo/Bar.php',
           'MyPackage\Foo\Bar',
         ),
       ),
@@ -138,8 +211,8 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   public function testDiscoveryPSRXRoot() {
 
     // Register PSR-X namespace.
-    $psrx = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $psrx);
+    $dir = $this->getFixturesSubdir('src-psrx');
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
@@ -152,11 +225,24 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
       array(
         'fileWithClass',
         array(
-          $psrx . '/Foo/Bar.php',
+          $dir . '/Foo/Bar.php',
           'MyVendor\MyPackage\Foo\Bar',
         ),
       ),
     ));
+  }
+
+  public function testClassExistsInNamespace() {
+
+    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
+    $namespaces = $this->hub->buildSearchableNamespaces();
+    $this->assertFalse($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
+    $namespaces->addNamespace('Namespace_With_Underscore\Sub_Namespace');
+    $this->assertTrue($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
+    $this->assertTrue($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
+    $namespaces->addNamespace('MyVendor\MyPackage');
+    $this->assertFalse($namespaces->classExistsInNamespaces('MyVendor\MyPackage\Foo\Bar'));
+
   }
 
   protected function assertArraySlice($array, $offset, $count, $compare) {
@@ -175,6 +261,6 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   }
 
   protected function getFixturesSubdir($suffix) {
-    return __DIR__ . '/../fixtures/' . $suffix;
+    return 'tests/fixtures/' . $suffix;
   }
 }
