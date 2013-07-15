@@ -1,5 +1,5 @@
 {
-    "name": "krautoload",
+    "name": "donquixote/krautoload",
     "description": "Krautoload is a pluggable class loader and class discovery tool.",
     "keywords": ["autoload", "classloader", "PSR-0", "PSR-4", "PSR-X", "PEAR"],
     "homepage": "http://github.com/donquixote/krautoload",
