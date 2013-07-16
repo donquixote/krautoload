@@ -27,7 +27,7 @@ class PrefixPathPlugin_ShallowPEAR_MapLeak extends PrefixPathPlugin_ShallowPEAR 
 
   protected function checkPrefix($relativePath) {
     foreach ($this->relativePrefixes as $relativePrefix => $length) {
-      if (!strncmp($relativePath, $relativePrefix, $length) {
+      if (!strncmp($relativePath, $relativePrefix, $length)) {
         return TRUE;
       }
     }

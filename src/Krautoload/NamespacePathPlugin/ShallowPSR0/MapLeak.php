@@ -27,7 +27,7 @@ class NamespacePathPlugin_ShallowPSR0_MapLeak extends NamespacePathPlugin_Shallo
 
   protected function checkPrefix($relativePath) {
     foreach ($this->relativePrefixes as $relativePrefix => $length) {
-      if (!strncmp($relativePath, $relativePrefix, $length) {
+      if (!strncmp($relativePath, $relativePrefix, $length)) {
         return TRUE;
       }
     }
