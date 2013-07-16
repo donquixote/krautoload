@@ -32,7 +32,7 @@ abstract class InjectedAPI_ClassFileVisitor_IncludeEachAbstract extends Injected
    * @inheritdoc
    */
   protected function includedFileWithClassCandidate($file, $relativeClassName) {
-    if (class_exists($class = $this->getInterface() . $relativeClassName, FALSE)) {
+    if (class_exists($class = $this->getNamespace() . $relativeClassName, FALSE)) {
       $this->confirmedFileWithClass($file, $class);
     }
     elseif (interface_exists($class, FALSE)) {

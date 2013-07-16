@@ -232,6 +232,32 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
+  public function testDiscoverExistingClasses() {
+
+    // Register PSR-0 and PSR-X mappings.
+    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
+    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
+
+    // Build SearchableNamespaces object.
+    $namespaces = $this->hub->buildSearchableNamespaces(array('Namespace_With_Underscore'));
+
+    // Search.
+    $classes = $namespaces->discoverExistingClasses(TRUE);
+    $expected = array(
+      'Namespace_With_Underscore\Sub_Namespace\Foo_Bar',
+      'Namespace_With_Underscore\Sub_Namespace\Foo_BarUnsafe',
+    );
+    $this->assertArrayElements($classes, array_combine($expected, $expected));
+
+    // Add another namespace (PSR-X)
+    $namespaces->addNamespace('MyVendor');
+
+    // Search again.
+    $classes = $namespaces->discoverExistingClasses(TRUE);
+    $expected[] = 'MyVendor\MyPackage\Foo\Bar';
+    $this->assertArrayElements($classes, array_combine($expected, $expected));
+  }
+
   public function testClassExistsInNamespace() {
 
     $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
@@ -242,17 +268,20 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
     $namespaces->addNamespace('MyVendor\MyPackage');
     $this->assertFalse($namespaces->classExistsInNamespaces('MyVendor\MyPackage\Foo\Bar'));
-
   }
 
-  protected function assertArraySlice($array, $offset, $count, $compare) {
+  protected function assertArraySlice(array $array, $offset, $count, array $compare) {
     $slice = array_slice($array, $offset, $count);
-    $this->sortBySerializing($slice);
-    $this->sortBySerializing($compare);
-    $this->assertEquals($compare, $slice);
+    $this->assertArrayElements($slice, $compare);
   }
 
-  protected function sortBySerializing(&$array) {
+  protected function assertArrayElements(array $array, array $compare) {
+    $this->sortBySerializing($array);
+    $this->sortBySerializing($compare);
+    $this->assertEquals($compare, $array);
+  }
+
+  protected function sortBySerializing(array &$array) {
     $sorted = array();
     foreach ($array as $item) {
       $sorted[] = serialize($item);
