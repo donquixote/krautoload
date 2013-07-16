@@ -242,6 +242,7 @@ class RegistrationHub {
   /**
    * @param array $classMap
    *   An array where the keys are classes, and the values are filenames.
+   * @param bool $override
    */
   function addClassMap(array $classMap, $override = FALSE) {
     $this->finder->addClassMap($classMap, $override);
@@ -250,6 +251,7 @@ class RegistrationHub {
   /**
    * @param string $class
    * @param string $file
+   * @param bool $override
    */
   function addClassFile($class, $file, $override = TRUE) {
     $this->finder->addClassFile($class, $file, $override);
@@ -258,8 +260,12 @@ class RegistrationHub {
   /**
    * @param array $namespaces
    * @return SearchableNamespaces_Interface
+   * @throws \Exception
    */
   function buildSearchableNamespaces($namespaces = array()) {
+    if (!$this->finder instanceof NamespaceInspector_Interface) {
+      throw new \Exception("Introspection not possible with the given class loader object.");
+    }
     $searchable = new SearchableNamespaces_Default($this->finder);
     $searchable->addNamespaces($namespaces);
     return $searchable;

@@ -106,6 +106,7 @@ class Util {
    *   Allows to implode the fragments with sth like "_" or "." or " ".
    *   If $glue is FALSE, it will just return an array.
    *
+   * @throws \Exception
    * @return array|string
    *   An indexed array of pieces, if $glue is FALSE.
    *   A glued string, if $glue is a string.
@@ -118,7 +119,6 @@ class Util {
     );
     static $regexp_by_example = array();
     if (!isset($regexp_by_example[$example_string])) {
-      $example_array = explode(' ', $example_string);
       foreach ($regexp_available as $regexp) {
         if (implode(' ', preg_split(
             $regexp,
@@ -128,6 +128,9 @@ class Util {
           )) == $example_string) {
           break;
         }
+      }
+      if (!isset($regexp)) {
+        throw new \Exception("Invalid example string '$example_string'.");
       }
       $regexp_by_example[$example_string] = $regexp;
     }

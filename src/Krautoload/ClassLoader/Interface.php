@@ -61,7 +61,7 @@ interface ClassLoader_Interface {
    *   The name of the class, with all namespaces prepended.
    *   E.g. Some\Namespace\Some\Class
    *
-   * @return TRUE|NULL
+   * @return boolean|NULL
    *   TRUE, if we found the file for the class.
    *   That is, if the $api->suggestFile($file) method returned TRUE one time.
    *   NULL, if we have no more suggestions.

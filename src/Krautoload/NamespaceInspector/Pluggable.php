@@ -19,6 +19,13 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
 
   /**
    * @param array $namespaces
+   *   Array of namespaces with arbitrary keys, and
+   *   with or without trailing or leading namespace separators.
+   * @return array
+   *   Array of namespaces, where key and value are identical,
+   *   The root namespace is represented by an empty string.
+   *   Every other namespace is represented with a trailing namespace separator,
+   *   but without a leading namespace separator.
    */
   protected function normalizeNamespaces(array $namespaces) {
     $normalized = array();
@@ -38,7 +45,6 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
    */
   protected function apiInspectNamespacesRecursive(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces) {
 
-    $namespaces = array_combine($namespaces, $namespaces);
     foreach ($this->namespaceMap as $logicalBasePath => $plugins) {
       $baseNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $logicalBasePath);
       $baseNamespacePrefix = $baseNamespace;

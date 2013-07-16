@@ -64,6 +64,9 @@ class NamespacePathPlugin_ShallowPSR0_AllUnderscore extends NamespacePathPlugin_
     // Check that $namespace is NOT a sub-namespace of the registered namespace.
     if ('' === $relativePath) {
       if (is_dir($baseDir)) {
+        /**
+         * @var \DirectoryIterator $fileinfo
+         */
         foreach (new \DirectoryIterator($baseDir) as $fileinfo) {
           // @todo With PHP 5.3.6, this could be $fileinfo->getExtension().
           if (pathinfo($fileinfo->getFilename(), PATHINFO_EXTENSION) == 'php') {
@@ -84,6 +87,9 @@ class NamespacePathPlugin_ShallowPSR0_AllUnderscore extends NamespacePathPlugin_
   }
 
   protected function doScanRecursive($api, $dir, $relativeNamespace = '\\') {
+    /**
+     * @var \DirectoryIterator $fileinfo
+     */
     foreach (new \DirectoryIterator($dir) as $fileinfo) {
       // @todo With PHP 5.3.6, this could be $fileinfo->getExtension().
       if (pathinfo($fileinfo->getFilename(), PATHINFO_EXTENSION) == 'php') {

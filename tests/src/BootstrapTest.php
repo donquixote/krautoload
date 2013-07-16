@@ -20,6 +20,6 @@ class BootstrapTest extends \PHPUnit_Framework_TestCase {
     ob_start();
     system('php ' . $options . ' tests/scripts/' . $script);
     $response = ob_get_clean();
-    $this->assertEquals('SUCCESS', $response);
+    $this->assertEquals($expected, $response);
   }
 }

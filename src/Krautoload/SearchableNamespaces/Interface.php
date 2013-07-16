@@ -55,6 +55,7 @@ interface SearchableNamespaces_Interface {
    * Visit all namespaces.
    *
    * @param InjectedAPI_NamespaceInspector_Interface $api
+   * @param bool $recursive
    */
   function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE);
 

@@ -72,6 +72,9 @@ class Krautoload {
           require_once $basedir . '/InjectedAPI/ClassFinder/LoadClassGetFile.php';
           // Build the cache decorator object.
           $cachedLoaderClass = 'Krautoload\ClassLoader_Cached_' . $options['cache'];
+          /**
+           * @var \Krautoload\ClassLoader_Interface $cachedLoader
+           */
           $cachedLoader = new $cachedLoaderClass($loader, $options['cache_prefix']);
           // Replace the loader on the spl stack.
           $loader->unregister();

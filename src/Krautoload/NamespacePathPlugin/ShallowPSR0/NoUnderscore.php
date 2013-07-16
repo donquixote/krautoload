@@ -25,4 +25,4 @@ namespace Krautoload;
  * It does not need to replace any underscores, it can use include instead of
  * include_once, and it does not need any class_exists() check.
  */
-class FinderPlugin_ShallowPSR0_NoUnderscore extends FinderPlugin_PSRX {}
+class NamespacePathPlugin_ShallowPSR0_NoUnderscore extends NamespacePathPlugin_PSRX {}
