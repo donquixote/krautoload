@@ -4,6 +4,8 @@ namespace Krautoload;
 
 /**
  * This plugin mimicks an odd behavior of the Composer class loader.
+ *
+ * @codeCoverageIgnore
  */
 class NamespacePathPlugin_ShallowPSR0_MapLeak extends NamespacePathPlugin_ShallowPSR0 {
 
