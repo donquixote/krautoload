@@ -3,18 +3,20 @@
 class Krautoload {
 
   /**
-   * @var \Krautoload\RegistrationHub
+   * @var \Krautoload\Adapter_ClassLoader_Interface
    */
-  static protected $hub;
+  static protected $adapter;
 
   /**
+   * Default bootstrap.
+   *
    * @param array $options
-   * @return \Krautoload\RegistrationHub
+   * @return \Krautoload\Adapter_ClassLoader_Interface
    * @throws Exception
    */
   static function start(array $options = array()) {
 
-    if (isset(self::$hub)) {
+    if (isset(self::$adapter)) {
       throw new Exception("Krautoload::start() can be called only once.");
     }
 
@@ -43,6 +45,7 @@ class Krautoload {
       // This being said, it is always possible to create a NamespaceInspector
       // independently of the actively registered class loader.
       require_once $basedir . '/NamespaceInspector/Interface.php';
+      require_once $basedir . '/NamespaceInspector/Pluggable/Interface.php';
       require_once $basedir . '/NamespaceInspector/Pluggable.php';
       $loader = new Krautoload\NamespaceInspector_Pluggable();
     }
@@ -59,8 +62,13 @@ class Krautoload {
     // Register the loader to the spl stack.
     $loader->register();
 
-    // Create the registration hub.
-    self::$hub = new Krautoload\RegistrationHub($loader);
+    // Create the adapter.
+    if (!empty($options['introspection'])) {
+      $adapter = new Krautoload\Adapter_NamespaceInspector_Pluggable($loader);
+    }
+    else {
+      $adapter = new Krautoload\Adapter_ClassLoader_Pluggable($loader);
+    }
 
     // Enable the cache, if any.
     switch ($options['cache']) {
@@ -79,17 +87,24 @@ class Krautoload {
           // Replace the loader on the spl stack.
           $loader->unregister();
           $cachedLoader->register();
-          // @todo Add the cached loader to the hub to make it accessible to the world?
+          // @todo Add the cached loader to the adapter to make it accessible to the world?
         }
     }
 
-    return self::$hub;
+    self::$adapter = $adapter;
+    return $adapter;
   }
 
+  /**
+   * Gets the $adapter object, if exists.
+   *
+   * @return \Krautoload\Adapter_ClassLoader_Interface
+   * @throws Exception
+   */
   static function registration() {
-    if (!isset(self::$hub)) {
+    if (!isset(self::$adapter)) {
       throw new Exception("Krautoload::start() must run before Krautoload::registration()");
     }
-    return self::$hub;
+    return self::$adapter;
   }
 }

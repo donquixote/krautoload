@@ -2,7 +2,7 @@
 
 namespace Krautoload;
 
-class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements NamespaceInspector_Interface {
+class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements NamespaceInspector_Pluggable_Interface {
 
   /**
    * @inheritdoc
