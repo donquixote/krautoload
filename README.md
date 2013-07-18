@@ -1,4 +1,5 @@
 [![Build Status](https://secure.travis-ci.org/donquixote/krautoload.png)](https://travis-ci.org/donquixote/krautoload)
+[![Coverage Status](https://coveralls.io/repos/donquixote/krautoload/badge.png)](https://coveralls.io/r/donquixote/krautoload)
 
 Krautoload is a pluggable PHP class autoloader library.
 In addition, it can do class discovery based on the same mappings registered in the class loader.

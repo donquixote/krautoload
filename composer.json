@@ -18,7 +18,8 @@
     },
     "require-dev": {
         "phpunit/php-invoker": ">=1.1.2",
-        "phpunit/phpunit": ">=3.7"
+        "phpunit/phpunit": ">=3.7",
+        "satooshi/php-coveralls": "*"
     },
     "autoload": {
         "psr-0": {
