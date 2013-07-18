@@ -38,7 +38,7 @@ abstract class InjectedAPI_ClassFileVisitor_IncludeEachAbstract extends Injected
     elseif (interface_exists($class, FALSE)) {
       $this->confirmedFileWithInterface($file, $class);
     }
-    elseif (function_exists('trait_exists') && trait_exists($class, FALSE)) {
+    elseif (PHP_VERSION_ID >= 50400 && trait_exists($class, FALSE)) {
       $this->confirmedFileWithTrait($file, $class);
     }
   }

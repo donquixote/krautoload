@@ -43,9 +43,10 @@ class NamespacePathPlugin_ShallowPSR0 implements NamespacePathPlugin_Interface {
       // We don't know if the file defines the class,
       // and whether it was already included.
       include_once $file;
+      // This check happens inline for micro-optimization.
       return class_exists($class, FALSE)
         || interface_exists($class, FALSE)
-        || (function_exists('trait_exists') && trait_exists($class, FALSE))
+        || (PHP_VERSION_ID >= 50400 && trait_exists($class, FALSE))
       ;
     }
   }

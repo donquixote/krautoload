@@ -29,10 +29,17 @@ class Util {
     }
   }
 
+  /**
+   * Checks whether an identifier is defined as either a class, interface or
+   * trait. Does not trigger autoloading.
+   *
+   * @param string $class
+   * @return bool
+   */
   static function classIsDefined($class) {
     return class_exists($class, FALSE)
       || interface_exists($class, FALSE)
-      || (function_exists('trait_exists') && trait_exists($class, FALSE))
+      || (PHP_VERSION_ID >= 50400 && trait_exists($class, FALSE))
     ;
   }
 
