@@ -43,13 +43,13 @@ class NamespacePathPlugin_ShallowPSR0_UseIncludePath extends NamespacePathPlugin
    * @inheritdoc
    */
   function pluginScanNamespace($api, $baseDir, $relativePath) {
-    throw new \Exception("Class discovery is not supported with 'use include path' setting.");
+    throw new Exception_NotSupported("Class discovery is not supported with 'use include path' setting.");
   }
 
   /**
    * @inheritdoc
    */
   function pluginScanRecursive($api, $baseDir, $relativePath) {
-    throw new \Exception("Class discovery is not supported with 'use include path' setting.");
+    throw new Exception_NotSupported("Class discovery is not supported with 'use include path' setting.");
   }
 }
