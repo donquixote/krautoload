@@ -38,7 +38,7 @@ class NamespaceInspector_Composer_Basic extends ClassLoader_Composer_Basic imple
     else {
       // The base namespace!
       if ($recursive) {
-        foreach ($this->prefixes as $predictor => $prefixes) {
+        foreach ($this->prefixes as $prefixes) {
           foreach ($prefixes as $prefix => $baseDirs) {
             $prefixPath = str_replace('\\', DIRECTORY_SEPARATOR, $prefix);
             $this->apiScanBackwardRecursive($api, $baseDirs, $prefixPath, $prefix);
