@@ -52,14 +52,6 @@ interface SearchableNamespaces_Interface {
   function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, $recursive = FALSE);
 
   /**
-   * Visit all namespaces.
-   *
-   * @param InjectedAPI_NamespaceInspector_Interface $api
-   * @param bool $recursive
-   */
-  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE);
-
-  /**
    * Scan all registered namespaces for class files, include each file, and
    * return all classes that actually exist (but no interfaces).
    *

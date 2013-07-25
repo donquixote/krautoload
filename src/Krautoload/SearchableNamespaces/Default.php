@@ -85,13 +85,6 @@ class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
   /**
    * @inheritdoc
    */
-  function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE) {
-    $this->inspector->apiInspectNamespaces($api, $this->namespaces, $recursive);
-  }
-
-  /**
-   * @inheritdoc
-   */
   function discoverExistingClasses($recursive = FALSE) {
     $api = new InjectedAPI_ClassFileVisitor_CollectExistingClasses();
     $this->apiVisitClassFiles($api, $recursive);

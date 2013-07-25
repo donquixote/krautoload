@@ -8,23 +8,12 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
    * @inheritdoc
    */
   public function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, array $namespaces, $recursive) {
-    $namespaceVisitorAPI = $recursive
-      ? new InjectedAPI_NamespaceInspector_ScanRecursive($api)
-      : new InjectedAPI_NamespaceInspector_ScanNamespace($api)
-    ;
-    $this->apiInspectNamespaces($namespaceVisitorAPI, $namespaces, $recursive);
-  }
-
-  /**
-   * @inheritdoc
-   */
-  public function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces, $recursive) {
     $namespaces = $this->normalizeNamespaces($namespaces);
     if ($recursive) {
-      $this->apiInspectNamespacesRecursive($api, $namespaces);
+      $this->apiScanNamespacesBackward($api, $namespaces);
     }
     foreach ($namespaces as $namespace) {
-      $this->apiInspectNamespace($api, $namespace);
+      $this->apiScanNamespaceForward($api, $namespace, $recursive);
     }
   }
 
@@ -51,10 +40,10 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
   }
 
   /**
-   * @param InjectedAPI_NamespaceInspector_Interface $api
+   * @param InjectedAPI_ClassFileVisitor_Interface $api
    * @param array $namespaces
    */
-  protected function apiInspectNamespacesRecursive(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces) {
+  protected function apiScanNamespacesBackward(InjectedAPI_ClassFileVisitor_Interface $api, array $namespaces) {
 
     foreach ($this->namespaceMap as $logicalBasePath => $plugins) {
       $baseNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $logicalBasePath);
@@ -78,7 +67,7 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
            * @var NamespacePathPlugin_Interface $plugin
            */
           foreach ($plugins as $baseDir => $plugin) {
-            $api->namespaceParentDirectoryPlugin($baseDir, $relativeBaseNamespace, $plugin);
+            $plugin->pluginScanParentRecursive($api, $baseDir, $relativeBaseNamespace);
           }
         }
       }
@@ -86,11 +75,12 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
   }
 
   /**
-   * @param InjectedAPI_NamespaceInspector_Interface $api
+   * @param InjectedAPI_ClassFileVisitor_Interface $api
    * @param string $namespace
    *   The namespace, e.g. 'MyVendor\\MyPackage\\'.
+   * @param $recursive
    */
-  protected function apiInspectNamespace(InjectedAPI_NamespaceInspector_Interface $api, $namespace) {
+  protected function apiScanNamespaceForward(InjectedAPI_ClassFileVisitor_Interface $api, $namespace, $recursive) {
 
     $logicalPath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
     $logicalBasePath = $logicalPath;
@@ -105,7 +95,12 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
          * @var NamespacePathPlugin_Interface $plugin
          */
         foreach ($this->namespaceMap[$logicalBasePath] as $baseDir => $plugin) {
-          $api->namespaceDirectoryPlugin($baseDir, $relativePath, $plugin);
+          if ($recursive) {
+            $plugin->pluginScanRecursive($api, $baseDir, $relativePath);
+          }
+          else {
+            $plugin->pluginScanNamespace($api, $baseDir, $relativePath);
+          }
         }
       }
 

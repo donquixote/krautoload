@@ -127,7 +127,92 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
+  /**
+   * @dataProvider getInspectors
+   */
   public function testDiscoveryPSR0Backward(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+    // Register PSR-0 namespace.
+    $dir = $this->getFixturesSubdir('src-psr0');
+    $adapter->addNamespacePSR0('Namespace_With_Underscore\Sub_Namespace', $dir);
+
+    // Build the mock $api object.
+    // We can't use the mock stuff shipped with PHPUnit, because we need a specific order of calls.
+    $api = new k\InjectedAPI_ClassFileVisitor_Mock();
+
+    // Run the discovery.
+    $searchable = $adapter->buildSearchableNamespaces(array(
+      'Namespace_With_Underscore',
+      '',
+    ));
+    $searchable->apiVisitClassFiles($api, TRUE);
+
+    // Verify the result.
+    $called = $api->mockGetCalled();
+
+    // The InjectedAPI object is being told about the to-be-inspected namespace.
+    $this->assertEquals($called[0], array('setNamespace', array('Namespace_With_Underscore\\')));
+
+    // The two class files for this namespace may be discovered in any order.
+    $this->assertArraySlice($called, 1, 2, array(
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
+          array(
+            // Class names are given relative to the inspected namespace.
+            // There are three class names that could be defined in the file.
+            // They are expected in this exact order.
+            'Sub_Namespace\Foo\BarUnsafe',
+            'Sub_Namespace\Foo_BarUnsafe',
+            // 'Sub_Namespace_Foo_BarUnsafe',
+          ),
+        ),
+      ),
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
+          array(
+            'Sub_Namespace\Foo\Bar',
+            'Sub_Namespace\Foo_Bar',
+            // 'Sub_Namespace_Foo_Bar',
+          ),
+        ),
+      ),
+    ));
+
+    // The InjectedAPI object is being told about the to-be-inspected namespace.
+    $this->assertEquals($called[3], array('setNamespace', array('')));
+
+    // The two class files for this namespace may be discovered in any order.
+    $this->assertArraySlice($called, 4, 2, array(
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/BarUnsafe.php',
+          array(
+            // Class names are given relative to the inspected namespace.
+            // There are three class names that could be defined in the file.
+            // They are expected in this exact order.
+            'Namespace_With_Underscore\Sub_Namespace\Foo\BarUnsafe',
+            'Namespace_With_Underscore\Sub_Namespace\Foo_BarUnsafe',
+            // 'Namespace_With_Underscore\Sub_Namespace_Foo_BarUnsafe',
+          ),
+        ),
+      ),
+      array(
+        'fileWithClassCandidates',
+        array(
+          $dir . '/Namespace_With_Underscore/Sub_Namespace/Foo/Bar.php',
+          array(
+            'Namespace_With_Underscore\Sub_Namespace\Foo\Bar',
+            'Namespace_With_Underscore\Sub_Namespace\Foo_Bar',
+            // 'Namespace_With_Underscore\Sub_Namespace_Foo_Bar',
+          ),
+        ),
+      ),
+    ));
 
   }
 

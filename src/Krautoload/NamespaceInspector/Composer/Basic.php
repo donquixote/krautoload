@@ -7,15 +7,6 @@ class NamespaceInspector_Composer_Basic extends ClassLoader_Composer_Basic imple
 
   /**
    * @inheritdoc
-   *
-   * @throws Exception_NotSupported
-   */
-  public function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces, $recursive) {
-    throw new Exception_NotSupported("Not supported with Composer.");
-  }
-
-  /**
-   * @inheritdoc
    */
   public function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, array $namespaces, $recursive) {
     foreach ($namespaces as $namespace) {
@@ -24,7 +15,6 @@ class NamespaceInspector_Composer_Basic extends ClassLoader_Composer_Basic imple
       $this->apiScanNamespace($api, $namespace, $recursive);
     }
   }
-
 
   protected function apiScanNamespace(InjectedAPI_ClassFileVisitor_Interface $api, $namespace, $recursive) {
     $api->setNamespace($namespace);
