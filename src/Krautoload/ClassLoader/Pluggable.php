@@ -2,14 +2,7 @@
 
 namespace Krautoload;
 
-class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_Pluggable_Interface {
-
-  /**
-   * Array of classes mapped to files.
-   *
-   * @var array
-   */
-  protected $classMap = array();
+class ClassLoader_Pluggable extends ClassLoader_AbstractClassMap implements ClassLoader_Pluggable_Interface {
 
   /**
    * Nested array, where
@@ -34,30 +27,6 @@ class ClassLoader_Pluggable extends ClassLoader_Abstract implements ClassLoader_
    * @var array
    */
   protected $prefixMap = array();
-
-  /**
-   * @inheritdoc
-   */
-  public function addClassMap(array $classMap, $override = TRUE) {
-    if (empty($this->classMap)) {
-      $this->classMap = $classMap;
-    }
-    elseif ($override) {
-      $this->classMap = array_merge($classMap, $this->classMap);
-    }
-    else {
-      $this->classMap = array_merge($this->classMap, $classMap);
-    }
-  }
-
-  /**
-   * @inheritdoc
-   */
-  public function addClassFile($class, $file, $override = TRUE) {
-    if ($override || !isset($this->classMap[$class])) {
-      $this->classMap[$class] = $file;
-    }
-  }
 
   /**
    * @inheritdoc

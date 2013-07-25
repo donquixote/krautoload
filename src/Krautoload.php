@@ -31,6 +31,7 @@ class Krautoload {
     $basedir = dirname(__FILE__) . '/Krautoload';
     require_once $basedir . '/ClassLoader/Interface.php';
     require_once $basedir . '/ClassLoader/Abstract.php';
+    require_once $basedir . '/ClassLoader/AbstractClassMap.php';
     require_once $basedir . '/ClassLoader/Pluggable/Interface.php';
     require_once $basedir . '/ClassLoader/Pluggable.php';
     require_once $basedir . '/NamespacePathPlugin/Interface.php';
