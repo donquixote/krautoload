@@ -147,6 +147,20 @@ class Adapter_ClassLoader_Pluggable implements Adapter_ClassLoader_Interface {
   /**
    * @inheritdoc
    */
+  function addMultiple(array $prefixes) {
+    $this->addPrefixesPSR0($prefixes);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  function add($prefix, $rootDirs) {
+    $this->addPrefixPSR0($prefix, $rootDirs);
+  }
+
+  /**
+   * @inheritdoc
+   */
   function addNamespacesPSR0(array $namespaces) {
     foreach ($namespaces as $namespace => $rootDirs) {
       $this->addNamespacePSR0($namespace, $rootDirs);

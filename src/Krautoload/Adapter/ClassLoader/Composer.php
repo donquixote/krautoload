@@ -103,6 +103,22 @@ class Adapter_ClassLoader_Composer implements Adapter_ClassLoader_Interface {
   /**
    * @inheritdoc
    */
+  function addMultiple(array $prefixes) {
+    foreach ($prefixes as $prefix => $rootDirs) {
+      $this->finder->add($prefix, $rootDirs);
+    }
+  }
+
+  /**
+   * @inheritdoc
+   */
+  function add($prefix, $rootDirs) {
+    $this->finder->add($prefix, $rootDirs);
+  }
+
+  /**
+   * @inheritdoc
+   */
   function addNamespacesPSR0(array $namespaces) {
     foreach ($namespaces as $namespace => $rootDirs) {
       $this->addNamespacePSR0($namespace, $rootDirs);

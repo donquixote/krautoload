@@ -70,6 +70,28 @@ interface Adapter_ClassLoader_Interface {
   function addPrefix($prefix, $rootDirs);
 
   /**
+   * Registers Composer-style PSR-0 prefixes.
+   * These prefixes can apply to both namespaced and non-namespaced classes.
+   * Alias for addPrefixesPSR0(), to be more consistent with other loaders.
+   *
+   * @param array $prefixes
+   *   Prefixes to add
+   */
+  function addMultiple(array $prefixes);
+
+  /**
+   * Registers a Composer-style PSR-0 prefix.
+   * This prefix can apply to both namespaced and non-namespaced classes.
+   * Alias for addPrefixPSR0(), to be more consistent with other loaders.
+   *
+   * @param string $prefix
+   *   The classes prefix
+   * @param array|string $rootDirs
+   *   The location(s) of the classes
+   */
+  function add($prefix, $rootDirs);
+
+  /**
    * Adds PSR-0 namespaces.
    * This will only apply to namespaced classes, unless one of the namespaces
    * is the root namespace.
