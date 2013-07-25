@@ -37,7 +37,6 @@ class Adapter_NamespaceInspector_Pluggable extends Adapter_ClassLoader_Pluggable
   /**
    * @param array $namespaces
    * @return SearchableNamespaces_Interface
-   * @throws \Exception
    */
   function buildSearchableNamespaces(array $namespaces = array()) {
     $searchable = new SearchableNamespaces_Default($this->finder);
