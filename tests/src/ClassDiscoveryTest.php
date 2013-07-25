@@ -10,38 +10,27 @@ use Krautoload as k;
 class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
 
   /**
-   * @var k\RegistrationHub
+   * @dataProvider getInspectors
    */
-  protected $hub;
-
-  /**
-   * @var k\NamespaceInspector_Interface
-   */
-  protected $inspector;
-
-  public function setUp() {
-    $this->inspector = new k\NamespaceInspector_Pluggable();
-    $this->hub = new k\RegistrationHub($this->inspector);
-  }
-
-  public function testDiscoveryPSR0() {
+  public function testDiscoveryPSR0(k\Adapter_NamespaceInspector_Interface $adapter) {
 
     // Register PSR-0 namespace.
     $dir = $this->getFixturesSubdir('src-psr0');
-    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $dir);
-    $this->hub->addNamespacePSR0('Namespaced', $dir);
-    $this->hub->addNamespacePSR0('Namespaced2', $dir);
+    $adapter->addNamespacePSR0('Namespace_With_Underscore', $dir);
+    $adapter->addNamespacePSR0('Namespaced', $dir);
+    $adapter->addNamespacePSR0('Namespaced2', $dir);
 
     // Build the mock $api object.
     // We can't use the mock stuff shipped with PHPUnit, because we need a specific order of calls.
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
 
     // Run the discovery.
-    $this->hub->buildSearchableNamespaces(array(
+    $searchable = $adapter->buildSearchableNamespaces(array(
       'Namespace_With_Underscore',
       'Namespaced',
       'Namespace_With_Underscore\Sub_Namespace',
-    ))->apiVisitClassFiles($api, TRUE);
+    ));
+    $searchable->apiVisitClassFiles($api, TRUE);
 
     // Verify the result.
     $called = $api->mockGetCalled();
@@ -138,14 +127,26 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
-  public function testDiscoveryPSRX() {
+  public function testDiscoveryPSR0Backward(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+  }
+
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testDiscoveryPSRX(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+    if (!$supportsPSRX) {
+      $this->assertTrue(TRUE);
+      return;
+    }
 
     // Register PSR-X namespace.
     $dir = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
+    $adapter->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage'))->apiVisitClassFiles($api, TRUE);
+    $adapter->buildSearchableNamespaces(array('MyVendor\MyPackage'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
     $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage\\')));
@@ -161,14 +162,22 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
-  public function testDiscoveryPSRXChild() {
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testDiscoveryPSRXChild(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+    if (!$supportsPSRX) {
+      $this->assertTrue(TRUE);
+      return;
+    }
 
     // Register PSR-X namespace.
     $dir = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
+    $adapter->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->hub->buildSearchableNamespaces(array('MyVendor\MyPackage\Foo'))->apiVisitClassFiles($api, TRUE);
+    $adapter->buildSearchableNamespaces(array('MyVendor\MyPackage\Foo'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
     $this->assertEquals($called[0], array('setNamespace', array('MyVendor\MyPackage\Foo\\')));
@@ -184,15 +193,23 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
-  public function testDiscoveryPSRXParent() {
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testDiscoveryPSRXParent(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+    if (!$supportsPSRX) {
+      $this->assertTrue(TRUE);
+      return;
+    }
 
     // Register PSR-X namespace.
     $dir = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
+    $adapter->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->hub->buildSearchableNamespaces(array('MyVendor'))->apiVisitClassFiles($api, TRUE);
+    $adapter->buildSearchableNamespaces(array('MyVendor'))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
     $this->assertEquals($called[0], array('setNamespace', array('MyVendor\\')));
@@ -208,15 +225,23 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
-  public function testDiscoveryPSRXRoot() {
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testDiscoveryPSRXRoot(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
+
+    if (!$supportsPSRX) {
+      $this->assertTrue(TRUE);
+      return;
+    }
 
     // Register PSR-X namespace.
     $dir = $this->getFixturesSubdir('src-psrx');
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $dir);
+    $adapter->addNamespacePSRX('MyVendor\MyPackage', $dir);
 
 
     $api = new k\InjectedAPI_ClassFileVisitor_Mock();
-    $this->hub->buildSearchableNamespaces(array(''))->apiVisitClassFiles($api, TRUE);
+    $adapter->buildSearchableNamespaces(array(''))->apiVisitClassFiles($api, TRUE);
     $called = $api->mockGetCalled();
 
     $this->assertEquals($called[0], array('setNamespace', array('')));
@@ -232,14 +257,19 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     ));
   }
 
-  public function testDiscoverExistingClasses() {
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testDiscoverExistingClasses(k\Adapter_NamespaceInspector_Interface $adapter, $supportsPSRX) {
 
     // Register PSR-0 and PSR-X mappings.
-    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
+    $adapter->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
+    if ($supportsPSRX) {
+      $adapter->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
+    }
 
     // Build SearchableNamespaces object.
-    $namespaces = $this->hub->buildSearchableNamespaces(array('Namespace_With_Underscore'));
+    $namespaces = $adapter->buildSearchableNamespaces(array('Namespace_With_Underscore'));
 
     // Search.
     $classes = $namespaces->discoverExistingClasses(TRUE);
@@ -249,19 +279,24 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
     );
     $this->assertArrayElements($classes, array_combine($expected, $expected));
 
-    // Add another namespace (PSR-X)
-    $namespaces->addNamespace('MyVendor');
+    if ($supportsPSRX) {
+      // Add another namespace (PSR-X)
+      $namespaces->addNamespace('MyVendor');
 
-    // Search again.
-    $classes = $namespaces->discoverExistingClasses(TRUE);
-    $expected[] = 'MyVendor\MyPackage\Foo\Bar';
-    $this->assertArrayElements($classes, array_combine($expected, $expected));
+      // Search again.
+      $classes = $namespaces->discoverExistingClasses(TRUE);
+      $expected[] = 'MyVendor\MyPackage\Foo\Bar';
+      $this->assertArrayElements($classes, array_combine($expected, $expected));
+    }
   }
 
-  public function testClassExistsInNamespace() {
+  /**
+   * @dataProvider getInspectors
+   */
+  public function testClassExistsInNamespace(k\Adapter_NamespaceInspector_Interface $adapter) {
 
-    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
-    $namespaces = $this->hub->buildSearchableNamespaces();
+    $adapter->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
+    $namespaces = $adapter->buildSearchableNamespaces();
     $this->assertFalse($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
     $namespaces->addNamespace('Namespace_With_Underscore\Sub_Namespace');
     $this->assertTrue($namespaces->classExistsInNamespaces('Namespace_With_Underscore\Sub_Namespace\Foo_Bar'));
@@ -292,4 +327,12 @@ class ClassDiscoveryTest extends \PHPUnit_Framework_TestCase {
   protected function getFixturesSubdir($suffix) {
     return 'tests/fixtures/' . $suffix;
   }
+
+  public function getInspectors() {
+    return array(
+      array(k\Adapter_NamespaceInspector_Pluggable::start(), TRUE),
+      array(k\Adapter_NamespaceInspector_Composer::start(), FALSE),
+    );
+  }
+
 }

@@ -4,60 +4,76 @@ namespace Krautoload\Tests;
 
 use Krautoload as k;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
 
   /**
-   * @var k\RegistrationHub
+   * @dataProvider getLoaders
    */
-  protected $hub;
-
-  /**
-   * @var k\ClassLoader_Pluggable_Interface
-   */
-  protected $loader;
-
-  public function setUp() {
-    $this->loader = new k\ClassLoader_Pluggable();
-    $this->hub = new k\RegistrationHub($this->loader);
-  }
-
-  public function testLoadClass() {
-    $this->hub->addClassMap(array(
+  public function testLoadClass(k\Adapter_ClassLoader_Interface $adapter) {
+    $adapter->addClassMap(array(
       'ClassMap\Foo\Bar' => $this->getFixturesSubdir('src-classmap') . '/classmap-foo-bar.php',
       'ClassMap\Foo\Baz' => $this->getFixturesSubdir('src-classmap') . '/classmap-foo-baz.php',
     ));
-    $this->hub->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
-    $this->hub->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
-    $this->hub->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
-    $this->assertLoadClass('ClassMap\Foo\Bar');
-    $this->assertLoadClass('ClassMap\Foo\Baz');
-    $this->assertLoadClass('Namespaced2\Foo');
-    $this->assertLoadClass('Pearlike2_Foo');
-    $this->assertLoadClass('MyVendor\MyPackage\Foo\Bar');
+    $adapter->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
+    $adapter->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
+    if ($adapter->supportsPSRX) {
+      $adapter->addNamespacePSRX('MyVendor\MyPackage', $this->getFixturesSubdir('src-psrx'));
+    }
+    $this->assertLoadClass($adapter, 'ClassMap\Foo\Bar');
+    $this->assertLoadClass($adapter, 'ClassMap\Foo\Baz');
+    $this->assertLoadClass($adapter, 'Namespaced2\Foo');
+    $this->assertLoadClass($adapter, 'Pearlike2_Foo');
+    if ($adapter->supportsPSRX) {
+      $this->assertLoadClass($adapter, 'MyVendor\MyPackage\Foo\Bar');
+    }
   }
 
-  public function testExotic() {
+  /**
+   * @dataProvider getLoaders
+   */
+  public function testExotic(k\Adapter_ClassLoader_Interface $adapter) {
+    if (!$adapter->supportsPlugins) {
+      $this->assertTrue(TRUE);
+      return;
+    }
     $plugin = new k\PrefixPathPlugin_Exotic_CamelSwap();
-    $this->hub->addPrefixPlugin('CamelSwap', $this->getFixturesSubdir('camel-swap'), $plugin);
+    $adapter->addPrefixPlugin('CamelSwap', $this->getFixturesSubdir('camel-swap'), $plugin);
     // The class is in tests/fixtures/camel-swap/controller/page/help.php.
-    $this->assertLoadClass('CamelSwap_HelpPageController');
+    $this->assertLoadClass($adapter, 'CamelSwap_HelpPageController');
   }
 
-  public function testUnderscoreSafe() {
+  /**
+   * @dataProvider getLoaders
+   */
+  public function testUnderscoreSafe(k\Adapter_ClassLoader_Interface $adapter) {
+    if (!$adapter->isSafePSR0) {
+      $this->assertTrue(TRUE);
+      return;
+    }
     // Using the paranoid plugin.
-    $this->hub->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
-    $this->assertLoadClass('Namespace_With_Underscore\Sub_Namespace\Foo_Bar');
+    $adapter->addNamespacePSR0('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0'));
+    $this->assertLoadClass($adapter, 'Namespace_With_Underscore\Sub_Namespace\Foo_Bar');
     // This would break in other class loaders.
-    $this->assertNotLoadClass('Namespace_With_Underscore\Sub_Namespace\Foo\Bar');
+    $this->assertNotLoadClass($adapter, 'Namespace_With_Underscore\Sub_Namespace\Foo\Bar');
   }
 
-  public function testUnderscoreUnsafe() {
+  /**
+   * @dataProvider getLoaders
+   */
+  public function testUnderscoreUnsafe(k\Adapter_ClassLoader_Interface $adapter) {
+    if (!$adapter->supportsPlugins) {
+      $this->assertTrue(TRUE);
+      return;
+    }
     // Using the non-paranoid plugin.
     $plugin = new k\NamespacePathPlugin_ShallowPSR0_NoConflict();
-    $this->hub->addNamespacePlugin('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0/Namespace_With_Underscore'), $plugin);
-    $this->assertLoadClass('Namespace_With_Underscore\Sub_Namespace\Foo_BarUnsafe');
+    $adapter->addNamespacePlugin('Namespace_With_Underscore', $this->getFixturesSubdir('src-psr0/Namespace_With_Underscore'), $plugin);
+    $this->assertLoadClass($adapter, 'Namespace_With_Underscore\Sub_Namespace\Foo_BarUnsafe');
     try {
-      $this->assertNotLoadClass('Namespace_With_Underscore\Sub_Namespace\Foo\BarUnsafe');
+      $this->assertNotLoadClass($adapter, 'Namespace_With_Underscore\Sub_Namespace\Foo\BarUnsafe');
     }
     catch (\Exception $e) {
       $this->assertEquals($e->getMessage(), 'Cannot redefine class.');
@@ -66,19 +82,26 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
     $this->fail('The NoConflict loader plugin is expected to break with duplicate class definition.');
   }
 
-  public function testUseIncludePath() {
+  /**
+   * @dataProvider getLoaders
+   */
+  public function testUseIncludePath(k\Adapter_ClassLoader_Interface $adapter) {
+    if (!$adapter->supportsPlugins) {
+      $this->assertTrue(TRUE);
+      return;
+    }
 
     // Register a plugin that can handle include path.
     $plugin = new k\PrefixPathPlugin_ShallowPEAR_UseIncludePath();
-    $this->hub->addPrefixPlugin('', '', $plugin);
+    $adapter->addPrefixPlugin('', '', $plugin);
 
-    $this->assertNotLoadClass('Foo', "Class 'Foo' still undefined after ->loadClass() without include path.");
+    $this->assertNotLoadClass($adapter, 'Foo', "Class 'Foo' still undefined after ->loadClass() without include path.");
 
     // Remember original include path.
     $includePath = get_include_path();
     set_include_path($this->getFixturesSubdir('includepath') . PATH_SEPARATOR . $includePath);
 
-    $this->loader->loadClass('Foo');
+    $adapter->getFinder()->loadClass('Foo');
     $this->assertClassDefined('Foo', "Class 'Foo' successfully loaded after ->loadClass() with include path.");
 
     // Revert include path to its original value.
@@ -88,40 +111,40 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider getLoadClassFromFallbackTests
    */
-  public function testLoadClassFromFallback($class, $from = '') {
-    $this->hub->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
-    $this->hub->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
+  public function testLoadClassFromFallback(k\Adapter_ClassLoader_Interface $adapter, $class, $from = '') {
+    $adapter->addNamespacePSR0('Namespaced2', $this->getFixturesSubdir('src-psr0'));
+    $adapter->addPrefixPEAR('Pearlike2', $this->getFixturesSubdir('src-psr0'));
     // addPrefixPSR0 applies to namespaced and non-namespaced classes.
-    $this->hub->addPrefixPSR0('', $this->getFixturesSubdir('fallback'));
+    $adapter->addPrefixPSR0('', $this->getFixturesSubdir('fallback'));
 
     $this->assertClassUndefined($class);
-    $this->loader->loadClass($class);
+    $adapter->getFinder()->loadClass($class);
     $this->assertClassDefined($class, "Class '$class' successfully loaded$from.");
   }
 
   public function getLoadClassFromFallbackTests() {
-    return array(
+    return $this->prepareArgs(array(
       array('Namespaced2\\Baz'),
       array('Pearlike2_Baz'),
       array('Namespaced2\\FooBar', ' from fallback dir'),
       array('Pearlike2_FooBar',    ' from fallback dir'),
-    );
+    ));
   }
 
   /**
    * @dataProvider getLoadClassNamespaceCollisionTests
    */
-  public function testLoadClassNamespaceCollision($namespaces, $class, $message) {
+  public function testLoadClassNamespaceCollision(k\Adapter_ClassLoader_Interface $adapter, $namespaces, $class, $message) {
 
-    $this->hub->addPrefixesPSR0($namespaces);
+    $adapter->addPrefixesPSR0($namespaces);
 
     $this->assertClassUndefined($class);
-    $this->loader->loadClass($class);
+    $adapter->getFinder()->loadClass($class);
     $this->assertClassDefined($class, $message);
   }
 
   public function getLoadClassNamespaceCollisionTests() {
-    return array(
+    return $this->prepareArgs(array(
       array(
         array(
           'NamespaceCollision\\C' => $this->getFixturesSubdir('alpha'),
@@ -186,21 +209,31 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
         'PrefixCollision_C_B_Bar',
         '->loadClass() loads PrefixCollision_C_B_Bar from beta.',
       ),
-    );
+    ));
   }
 
-  protected function assertLoadClass($class, $message = NULL) {
+  protected function prepareArgs($args_all) {
+    $result = array();
+    foreach ($this->getLoaders() as $loader_args) {
+      foreach ($args_all as $args) {
+        $result[] = array_merge($loader_args, $args);
+      }
+    }
+    return $result;
+  }
+
+  protected function assertLoadClass(k\Adapter_ClassLoader_Interface $adapter, $class, $message = NULL) {
     $this->assertClassUndefined($class);
-    $this->loader->loadClass($class);
+    $adapter->getFinder()->loadClass($class);
     $this->assertClassDefined($class, $message);
   }
 
-  protected function assertNotLoadClass($class, $message = NULL) {
+  protected function assertNotLoadClass(k\Adapter_ClassLoader_Interface $adapter, $class, $message = NULL) {
     if (!isset($message)) {
       $message = "Class '$class' is still undefined after ->loadClass().";
     }
     $this->assertClassUndefined($class);
-    $this->loader->loadClass($class);
+    $adapter->getFinder()->loadClass($class);
     $this->assertClassUndefined($class, $message);
   }
 
@@ -220,5 +253,23 @@ class PluggableClassLoaderTest extends \PHPUnit_Framework_TestCase {
 
   protected function getFixturesSubdir($suffix) {
     return __DIR__ . '/../fixtures/' . $suffix;
+  }
+
+  public function getLoaders() {
+    $loaders = array();
+
+    $adapter = k\Adapter_ClassLoader_Pluggable::start();
+    $adapter->supportsPSRX = TRUE;
+    $adapter->supportsPlugins = TRUE;
+    $adapter->isSafePSR0 = TRUE;
+    $loaders[] = array($adapter);
+
+    $adapter = k\Adapter_ClassLoader_Composer::start();
+    $adapter->supportsPSRX = FALSE;
+    $adapter->supportsPlugins = FALSE;
+    $adapter->isSafePSR0 = FALSE;
+    $loaders[] = array($adapter);
+
+    return $loaders;
   }
 }
