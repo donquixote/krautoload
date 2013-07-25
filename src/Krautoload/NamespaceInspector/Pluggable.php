@@ -7,6 +7,17 @@ class NamespaceInspector_Pluggable extends ClassLoader_Pluggable implements Name
   /**
    * @inheritdoc
    */
+  public function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, array $namespaces, $recursive) {
+    $namespaceVisitorAPI = $recursive
+      ? new InjectedAPI_NamespaceInspector_ScanRecursive($api)
+      : new InjectedAPI_NamespaceInspector_ScanNamespace($api)
+    ;
+    $this->apiInspectNamespaces($namespaceVisitorAPI, $namespaces, $recursive);
+  }
+
+  /**
+   * @inheritdoc
+   */
   public function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, array $namespaces, $recursive) {
     $namespaces = $this->normalizeNamespaces($namespaces);
     if ($recursive) {
