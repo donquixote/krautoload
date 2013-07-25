@@ -38,6 +38,4 @@ interface ClassLoader_Composer_Interface extends ClassLoader_Interface {
    */
   public function getUseIncludePath();
 
-  public function findFile($class);
-
 }
