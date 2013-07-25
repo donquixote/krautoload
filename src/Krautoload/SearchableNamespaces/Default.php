@@ -4,21 +4,21 @@ namespace Krautoload;
 
 class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
 
-  protected $finder;
+  protected $inspector;
   protected $namespaces = array();
 
   /**
-   * @param NamespaceInspector_Interface $finder
+   * @param NamespaceInspector_Interface $inspector
    */
-  function __construct(NamespaceInspector_Interface $finder) {
-    $this->finder = $finder;
+  function __construct(NamespaceInspector_Interface $inspector) {
+    $this->inspector = $inspector;
   }
 
   /**
-   * @param NamespaceInspector_Interface $finder
+   * @param NamespaceInspector_Interface $inspector
    */
-  function setFinder(NamespaceInspector_Interface $finder) {
-    $this->finder = $finder;
+  function setFinder(NamespaceInspector_Interface $inspector) {
+    $this->inspector = $inspector;
   }
 
   /**
@@ -56,7 +56,7 @@ class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
    * @inheritdoc
    */
   function buildSearchableNamespaces(array $namespaces = array()) {
-    $new = new self($this->finder);
+    $new = new self($this->inspector);
     $new->addNamespaces($namespaces);
     return $new;
   }
@@ -79,18 +79,14 @@ class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
    * @inheritdoc
    */
   function apiVisitClassFiles(InjectedAPI_ClassFileVisitor_Interface $api, $recursive = FALSE) {
-    $namespaceVisitorAPI = $recursive
-      ? new InjectedAPI_NamespaceInspector_ScanRecursive($api)
-      : new InjectedAPI_NamespaceInspector_ScanNamespace($api)
-    ;
-    $this->apiInspectNamespaces($namespaceVisitorAPI, $recursive);
+    $this->inspector->apiVisitClassFiles($api, $this->namespaces, $recursive);
   }
 
   /**
    * @inheritdoc
    */
   function apiInspectNamespaces(InjectedAPI_NamespaceInspector_Interface $api, $recursive = FALSE) {
-    $this->finder->apiInspectNamespaces($api, $this->namespaces, $recursive);
+    $this->inspector->apiInspectNamespaces($api, $this->namespaces, $recursive);
   }
 
   /**
@@ -136,6 +132,6 @@ class SearchableNamespaces_Default implements SearchableNamespaces_Interface {
     else {
       $api = new InjectedAPI_ClassFinder_LoadClass($class);
     }
-    return $this->finder->apiFindFile($api, $class);
+    return $this->inspector->apiFindFile($api, $class);
   }
 }
