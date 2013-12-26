@@ -4,17 +4,19 @@
 Krautoload is a pluggable PHP class autoloader library.
 In addition, it can do class discovery based on the same mappings registered in the class loader.
 
+Status: Development of this library is currently "sleeping". Please let me know about your use cases in the issue queue, so I can decide whether this project should have a future and what it should look like.
+
 The class loader has native support for
 - Class maps.
-- The [proposed PSR-X](https://github.com/php-fig/fig-standards/blob/master/proposed/autoloader.md), which is a shallow-dir variation of PSR-0 without the special underscore handling.
+- [PSR-4](https://github.com/php-fig/fig-standards/blob/master/proposed/psr-4-autoloader/psr-4-autoloader.md), which Krautoload still refers to as PSR-X (this needs to be fixed).
 - [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md)
 - PEAR (that is the old-school pattern with underscores instead of namespaces)  
   (yes, this is just a subset of PSR-0, but Krautoload has explicit support for it)
 - Variations of PSR-0 with different levels of "safety" (to avoid duplicate file inclusion, etc)
 
 It also supports some "non-standard" stuff, *just because we can*, and it was too tempting not to do it:
-- Variation of PSR-0 which allows shallow directory structures.
-- Variation of PEAR which allows shallow directory structures.
+- Variation of PSR-0 which allows flat directory structures, but has the underscore handling of PSR-0.
+- Variation of PEAR which allows flat directory structures.
 
 Besides that, custom plugins can be mapped to any namespaces and prefixes, to allow the most wonky logical mappings.  
 E.g. there is an example plugin "CamelSwap", that would map a class ".._TinyPetShop" to "../shop/pet/tiny.php".
